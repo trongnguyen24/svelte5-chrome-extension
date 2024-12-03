@@ -161,15 +161,17 @@ module.exports = {
 
 ```svelte
 <script>
-  let count = 0;
+  let count = $state(0);
 </script>
 
 <div class="p-4 bg-base-200">
-  <button class="btn btn-primary" on:click={() => count++}>
+  <button class="btn btn-primary" onclick={() => count++}>
     Increment: {count}
   </button>
 </div>
 ```
+
+![alt text](image.png)
 
 ---
 
