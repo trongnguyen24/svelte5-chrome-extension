@@ -36,8 +36,6 @@ Before you begin, ensure you have the following installed:
    cd chrome-extension-starter
    ```
 
-````
-
 2. **Install Dependencies:**
 
    Using npm:
@@ -236,4 +234,3 @@ If you encounter any issues or bugs, please file an issue in the [GitHub reposit
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
-````
