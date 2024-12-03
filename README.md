@@ -1,6 +1,3 @@
-Here’s a comprehensive `README.md` for your Chrome Extension Starter project:
-
-````markdown
 # Chrome Extension Starter
 
 A modern Chrome extension starter template powered by **Vite**, **Svelte 5**, **TypeScript**, **TailwindCSS**, and **DaisyUI**. This template is designed for rapid development of MV3 (Manifest Version 3) extensions with a focus on performance, modularity, and modern developer tools.
@@ -38,6 +35,7 @@ Before you begin, ensure you have the following installed:
    git clone https://github.com/your-username/chrome-extension-starter.git
    cd chrome-extension-starter
    ```
+
 ````
 
 2. **Install Dependencies:**
@@ -238,7 +236,4 @@ If you encounter any issues or bugs, please file an issue in the [GitHub reposit
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
-
-```
-
-```
+````
