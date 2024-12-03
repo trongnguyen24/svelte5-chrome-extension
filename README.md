@@ -6,12 +6,12 @@ A modern Chrome extension starter template powered by **Vite**, **Svelte 5**, **
 
 ## ✨ Features
 
-- **Vite**: Lightning-fast bundler for modern web development.
-- **Svelte 5**: Minimal reactivity and clean component architecture.
-- **TypeScript**: Static typing for better code quality and maintainability.
-- **TailwindCSS**: Utility-first CSS framework for rapid UI development.
-- **DaisyUI**: TailwindCSS-based components for faster styling.
-- **Chrome Manifest V3**: Secure and powerful API for Chrome extensions.
+- **[Vite](https://vite.dev/)**: Lightning-fast bundler for modern web development.
+- **[Svelte 5](https://svelte.dev/docs/svelte/what-are-runes)**: Minimalistic framework for building user interfaces.
+- **[TypeScript](https://www.typescriptlang.org/docs/handbook/intro.html)**: Static typing for better code quality and maintainability.
+- **[TailwindCSS](https://tailwindcss.com/docs)**: Utility-first CSS framework for rapid UI development.
+- **[DaisyUI](https://daisyui.com/)**: TailwindCSS-based components for faster styling.
+- **[Chrome Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3)**: Secure and powerful API for Chrome extensions.
 
 ---
 
