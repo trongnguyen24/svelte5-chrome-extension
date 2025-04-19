@@ -6,11 +6,16 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
+      input: {
+        // Add input configuration
+        main: 'index.html', // Keep the default entry point
+        background: 'src/background.js', // Add background script as an entry point
+      },
       output: {
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
-        assetFileNames: `assets/[name].[ext]`
-      }
-    }
-  }
+        assetFileNames: `assets/[name].[ext]`,
+      },
+    },
+  },
 })

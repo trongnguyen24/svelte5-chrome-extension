@@ -1,15 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Summaryyyyy",
-  "action": {
-    "default_side_panel": "index.html"
-  },
+  "name": "Web & YouTube Summarizerrr",
   "version": "1.0.0",
-  "description": "A Chrome extension with side panel built using Svelte",
+  "description": "Tóm tắt nội dung trang web và video YouTube bằng Gemini API thông qua Side Panel.",
+  "permissions": ["sidePanel", "storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
   "side_panel": {
     "default_path": "index.html"
   },
-  "permissions": ["sidePanel"],
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Mở trình tóm tắt"
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
