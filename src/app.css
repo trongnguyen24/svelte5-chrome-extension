@@ -2,17 +2,17 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-background:oklch(.141 .005 285.823);
-  --color-surface-1:oklch(.21 .006 285.885);
-  --color-surface-2:oklch(.274 .006 286.033);
-  --color-border:oklch(.371 0 0);
+  --color-background:oklch(17.8% 0.0042 277.7);
+  --color-surface-1:oklch(21.5% 0.004 277.7);
+  --color-surface-2:oklch(25.5% 0.0055 277.7);
+  --color-border:oklch(28.4% 0.0075 277.7);
 
   /* Text colors */
-  --color-text-primary:oklch(.922 0 0);
-  --color-text-secondary:oklch(.705 .015 286.067);
-  --color-muted:oklch(.556 0 0);
+  --color-text-primary:oklch(77% 0.0138 277.7);
+  --color-text-secondary:oklch(54% 0.0167 277.7);
+  --color-muted:oklch(40.2% 0.0121 277.7);
 
-  --color-primary: oklch(.666 .179 58.318);
+  --color-primary: oklch(69.1% 0.1909 45.02);
 
   /* Status colors */
   --color-success:oklch(.768 .233 130.85);

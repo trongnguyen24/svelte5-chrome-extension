@@ -101,11 +101,18 @@
 
     <!-- Summary Result -->
     {#if summary}
-      <div class="mt-4 p-4 prose w-full bg-surface-1 rounded-lg">
+      <div class="mt-4 p-4 prose dark:prose-invert w-full bg-surface-1 border-border rounded-lg">
         <h2 class=" text-lg font-semibold mb-2">Kết quả tóm tắt:</h2>
         {@html summary}
+        dasdad
       </div>
     {/if}
+
+    <div class="mt-4 p-4 prose dark:prose-invert w-full bg-surface-1 border border-border/25 border-t-border shadow-lg rounded-lg">
+      <h2 class=" text-lg font-semibold mb-2">Kết quả tóm tắt:</h2>
+      {@html summary}
+      dasdad
+    </div>
   </div>
 
   <!-- Settings Sidebar -->
