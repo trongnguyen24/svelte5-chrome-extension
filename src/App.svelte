@@ -78,15 +78,15 @@
 
 <div class="bg-background xs:px-8 xs:pb-32">
   <!-- Main Content -->
-  <div class="flex-grow max-w-3xl mx-auto flex flex-col">
-    <div class="p-6 xs:px-0 flex items-center justify-between">
+  <div class="flex-grow max-w-2xl mx-auto flex flex-col">
+    <div class="p-4 xs:px-0 flex items-center justify-between">
       <div class="flex relative size-12 rounded-full">
         <span class="absolute inset-0 z-0 animate-spin-slow-2">
           <span
-            class="absolute inset-0 bg-primary rounded-full bg-conic from-surface-1 to-primary animate-spin-slow"
+            class="absolute inset-0 bg-primary rounded-full bg-conic from-border to-primary animate-spin-slow"
           ></span>
           <span
-            class="absolute inset-0 bg-primary rounded-full bg-conic from-surface-1 from-80% to-amber-400 animate-spin-slow blur-[2px]"
+            class="absolute inset-0 bg-primary rounded-full bg-conic from-transparent from-80% to-amber-400 animate-spin-slow blur-[2px]"
           ></span>
         </span>
         <button
@@ -125,7 +125,7 @@
     <!-- Summary Result -->
     {#if summary}
       <div
-        class="p-4 xs:p-8 pb-24 prose dark:prose-invert w-full max-w-3xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+        class="p-4 xs:p-8 pb-24 prose dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
       >
         {@html summary}
       </div>
