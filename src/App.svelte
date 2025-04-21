@@ -79,7 +79,7 @@
 <div class="bg-background xs:px-8 xs:pb-32 pt-36">
   <!-- Main Content -->
   <div class="max-w-2xl mx-auto flex flex-col">
-      <div class="px-4 py-12 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-0 xs:px-8 flex items-center justify-between header-animation ">
+      <div class="px-4 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-0 xs:px-8 flex items-center justify-between header-animation ">
         <div class="flex relative size-12 rounded-full">
           <span class="absolute inset-0 z-0 animate-spin-slow-2">
             <span
