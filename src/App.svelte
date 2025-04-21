@@ -1,5 +1,7 @@
 <script>
   import Setting from './components/Setting.svelte'
+  import Settingbar from './components/Settingbar.svelte'
+  import Icon from '@iconify/svelte'
   import { marked } from 'marked' // Import marked để render Markdown
   import { getApiKey, summarizeWithGemini } from './lib/api.js' // Import từ api.js
 
@@ -74,19 +76,40 @@
   }
 </script>
 
-<div class="h-screen flex bg-background p-4">
+<div class="bg-background xs:px-8 xs:pb-32">
   <!-- Main Content -->
-  <div class="flex-grow flex flex-col items-center p-4">
-    <h1 class="mb-4 text-text-primary text-xl">SuperSummary</h1>
-
-    <div class="text-center mb-4">
-      <button
-        onclick={handleSummarizeText}
-        class=" bg-primary text-white px-4 py-2 rounded disabled:opacity-50"
-        disabled={isLoading}
-      >
-        {isLoading ? 'Đang tóm tắt...' : 'Tóm tắt trang này'}
-      </button>
+  <div class="flex-grow max-w-3xl mx-auto flex flex-col">
+    <div class="p-6 xs:px-0 flex items-center justify-between">
+      <div class="flex relative size-12 rounded-full">
+        <span class="absolute inset-0 z-0 animate-spin-slow-2">
+          <span
+            class="absolute inset-0 bg-primary rounded-full bg-conic from-surface-1 to-primary animate-spin-slow"
+          ></span>
+          <span
+            class="absolute inset-0 bg-primary rounded-full bg-conic from-surface-1 from-80% to-amber-400 animate-spin-slow blur-[2px]"
+          ></span>
+        </span>
+        <button
+          onclick={handleSummarizeText}
+          class="absolute z-10 inset-px text-primary bg-surface-1 flex items-center justify-center rounded-full disabled:opacity-100"
+          disabled={isLoading}
+        >
+          {#if isLoading}
+            <Icon
+              width={24}
+              icon="mingcute:loading-3-fill"
+              class="animate-spin"
+            />
+          {:else}
+            <Icon
+              class="translate-x-0.5"
+              width={24}
+              icon="heroicons:play-solid"
+            />
+          {/if}
+        </button>
+      </div>
+      <div class="flex"><Settingbar /></div>
     </div>
 
     <!-- Loading Indicator -->
@@ -101,20 +124,15 @@
 
     <!-- Summary Result -->
     {#if summary}
-      <div class="mt-4 p-4 prose dark:prose-invert w-full bg-surface-1 border-border rounded-lg">
-        <h2 class=" text-lg font-semibold mb-2">Kết quả tóm tắt:</h2>
+      <div
+        class="p-4 xs:p-8 pb-24 prose dark:prose-invert w-full max-w-3xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+      >
         {@html summary}
-        dasdad
       </div>
     {/if}
-
-    <div class="mt-4 p-4 prose dark:prose-invert w-full bg-surface-1 border border-border/25 border-t-border shadow-lg rounded-lg">
-      <h2 class=" text-lg font-semibold mb-2">Kết quả tóm tắt:</h2>
-      {@html summary}
-      dasdad
-    </div>
   </div>
-
+  <div
+    class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-10"
+  ></div>
   <!-- Settings Sidebar -->
-  <Setting />
 </div>

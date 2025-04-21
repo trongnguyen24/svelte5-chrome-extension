@@ -120,6 +120,7 @@
       >
         <option value="paragraph">Đoạn văn</option>
         <option value="bullet">Gạch đầu dòng</option>
+        <option value="heading">Cấp tiêu đề</option>
       </select>
     </div>
 

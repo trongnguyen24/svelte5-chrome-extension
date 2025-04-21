@@ -12,16 +12,16 @@ export async function getSummaryOptions() {
             length: result.summaryLength || 'medium',
             lang: result.summaryLang || 'vi',
             format: result.summaryFormat || 'paragraph',
-          });
+          })
         }
-      );
+      )
     } else {
       console.warn(
         'chrome.storage.sync not available. Returning default options.'
-      );
-      resolve({ length: 'medium', lang: 'vi', format: 'paragraph' });
+      )
+      resolve({ length: 'medium', lang: 'vi', format: 'paragraph' })
     }
-  });
+  })
 }
 
 export function buildPrompt(text, options) {
@@ -40,6 +40,7 @@ Khi nhận được nội dung, hãy phân tích và tóm tắt nội dung chín
 3. Định dạng: ${options.format}
    - "paragraph": Tóm tắt dưới dạng văn bản liền mạch
    - "bullet": Liệt kê các điểm chính bằng dấu gạch đầu dòng
+   - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
 
 Trong tóm tắt của bạn:
 - Nắm bắt thông tin quan trọng nhất trước
@@ -54,8 +55,8 @@ Nội dung cần tóm tắt:
 ${text}
 
 Lưu ý: Nếu bạn không thể tóm tắt vì bất kỳ lý do gì (ví dụ: nội dung không phù hợp), hãy thông báo cho người dùng.
-`;
+`
   // Replace placeholders with actual option values. Note: The template already does this via template literals.
   // The 'text' is appended at the end.
-  return promptTemplate;
-} 
+  return promptTemplate
+}

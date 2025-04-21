@@ -2,22 +2,23 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-background:oklch(17.8% 0.0042 277.7);
-  --color-surface-1:oklch(21.5% 0.004 277.7);
-  --color-surface-2:oklch(25.5% 0.0055 277.7);
-  --color-border:oklch(28.4% 0.0075 277.7);
+  --breakpoint-xs: 38rem;
+  --color-background: oklch(0.23 0.0041 264.49); /* Gray 1 */
+  --color-surface-1: oklch(29.9% 0.0044 271.2); /* Gray 3 */
+  --color-surface-2: oklch(32.3% 0.0056 271.2); /* Gray 4 */
+  --color-border: oklch(34.9% 0.003 106.6); /* Gray 6 */
 
   /* Text colors */
-  --color-text-primary:oklch(77% 0.0138 277.7);
-  --color-text-secondary:oklch(54% 0.0167 277.7);
-  --color-muted:oklch(40.2% 0.0121 277.7);
+  --color-text-primary: oklch(94.8% 0.0023 106.6); /* Gray 12 */
+  --color-text-secondary: oklch(76.7% 0.003 106.6); /* Gray 11 */
+  --color-muted: oklch(53.5% 0.003 106.6); /* Gray 9 */
 
   --color-primary: oklch(69.1% 0.1909 45.02);
 
   /* Status colors */
-  --color-success:oklch(.768 .233 130.85);
-  --color-warning: oklch(.795 .184 86.047); 
-  --color-error: oklch(.637 .237 25.331);
+  --color-success: oklch(0.768 0.233 130.85);
+  --color-warning: oklch(0.795 0.184 86.047);
+  --color-error: oklch(0.637 0.237 25.331);
 }
 
 body {
@@ -27,4 +28,28 @@ body {
   padding: 0;
   background-color: var(--color-background);
   color: var(--color-text-primary);
+}
+
+.settingbar button {
+  @apply p-1 hover:bg-surface-2 rounded-md  transition-colors duration-150;
+}
+
+.settingbar button:hover {
+  @apply bg-surface-2;
+}
+.settingbar button.active {
+  @apply text-text-primary;
+}
+/* Thêm style cho nút active nếu muốn */
+/* button.active { */
+/*   background-color: #your-active-color; */
+/*   color: white; */
+/* } */
+
+.animate-spin-slow {
+  animation: spin 4s cubic-bezier(0.11, 0.5, 0.89, 0.5) infinite;
+}
+
+.animate-spin-slow-2 {
+  animation: spin 5s linear infinite;
 }
