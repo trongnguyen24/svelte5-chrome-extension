@@ -53,3 +53,26 @@ body {
 .animate-spin-slow-2 {
   animation: spin 5s linear infinite;
 }
+
+.header-animation {
+  animation-name: shrink-and-fade;
+  animation-duration: auto;
+  animation-fill-mode: both;
+  animation-timeline: scroll();
+  animation-range: 0 300;
+}
+
+@keyframes shrink-and-fade {
+  
+  0% {
+    transform: scale(1); /* Kích thước bình thường */
+    opacity: 1;        /* Hoàn toàn rõ nét */
+  }
+
+
+
+  100% {
+    transform: scale(0.9); /* Thu nhỏ còn 80% */
+     opacity: 0;        
+  }
+}

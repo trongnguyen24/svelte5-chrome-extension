@@ -76,42 +76,42 @@
   }
 </script>
 
-<div class="bg-background xs:px-8 xs:pb-32">
+<div class="bg-background xs:px-8 xs:pb-32 pt-36">
   <!-- Main Content -->
-  <div class="flex-grow max-w-2xl mx-auto flex flex-col">
-    <div class="p-4 xs:px-0 flex items-center justify-between">
-      <div class="flex relative size-12 rounded-full">
-        <span class="absolute inset-0 z-0 animate-spin-slow-2">
-          <span
-            class="absolute inset-0 bg-primary rounded-full bg-conic from-border to-primary animate-spin-slow"
-          ></span>
-          <span
-            class="absolute inset-0 bg-primary rounded-full bg-conic from-transparent from-80% to-amber-400 animate-spin-slow blur-[2px]"
-          ></span>
-        </span>
-        <button
-          onclick={handleSummarizeText}
-          class="absolute z-10 inset-px text-primary bg-surface-1 flex items-center justify-center rounded-full disabled:opacity-100"
-          disabled={isLoading}
-        >
-          {#if isLoading}
-            <Icon
-              width={24}
-              icon="mingcute:loading-3-fill"
-              class="animate-spin"
-            />
-          {:else}
-            <Icon
-              class="translate-x-0.5"
-              width={24}
-              icon="heroicons:play-solid"
-            />
-          {/if}
-        </button>
-      </div>
-      <div class="flex"><Settingbar /></div>
-    </div>
+  <div class="max-w-2xl mx-auto flex flex-col">
+      <div class="px-4 py-12 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-0 xs:px-8 flex items-center justify-between header-animation ">
+        <div class="flex relative size-12 rounded-full">
+          <span class="absolute inset-0 z-0 animate-spin-slow-2">
+            <span
+              class="absolute inset-0  rounded-full bg-conic from-border to-primary animate-spin-slow"
+            ></span>
+            <span
+              class="absolute inset-0  rounded-full bg-conic from-transparent from-80% to-amber-400 animate-spin-slow blur-[2px]"
+            ></span>
+          </span>
+          <button
+            onclick={handleSummarizeText}
+            class="absolute z-10 inset-px text-primary bg-surface-1 flex items-center justify-center rounded-full disabled:opacity-100"
+            disabled={isLoading}
+          >
+            {#if isLoading}
+              <Icon
+                width={24}
+                icon="mingcute:loading-3-fill"
+                class="animate-spin"
+              />
+            {:else}
+              <Icon
+                class="translate-x-0.5"
+                width={24}
+                icon="heroicons:play-solid"
+              />
+            {/if}
+          </button>
+        </div>
+        <div class="flex"><Settingbar /></div>
 
+    </div>
     <!-- Loading Indicator -->
     {#if isLoading}
       <div class="text-center">Đang xử lý...</div>
@@ -125,14 +125,16 @@
     <!-- Summary Result -->
     {#if summary}
       <div
-        class="p-4 xs:p-8 pb-24 prose dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+        class="p-4 xs:p-8 pb-24 relative z-20 prose dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
       >
         {@html summary}
       </div>
     {/if}
+
+   
   </div>
   <div
-    class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-10"
+    class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-30"
   ></div>
   <!-- Settings Sidebar -->
 </div>
