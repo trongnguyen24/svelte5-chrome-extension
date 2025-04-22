@@ -4,6 +4,9 @@
   import Icon from '@iconify/svelte'
   import { marked } from 'marked' // Import marked để render Markdown
   import { getApiKey, summarizeWithGemini } from './lib/api.js' // Import từ api.js
+  import 'overlayscrollbars/overlayscrollbars.css' // Import CSS overlayscrollbars
+  import { useOverlayScrollbars } from 'overlayscrollbars-svelte' // Import primitive
+  import { onMount, onDestroy } from 'svelte' // Import lifecycle functions
 
   let textToSummarize = $state('')
   let summary = $state('')
@@ -74,43 +77,63 @@
       isLoading = false
     }
   }
+
+  // --- OverlayScrollbars Primitive Usage ---
+  const options = {
+    scrollbars: {
+      autoHide: 'scroll',
+      theme: 'os-theme-custom-app',
+    },
+  }
+  const [initialize, instance] = useOverlayScrollbars({ options, defer: true })
+
+  onMount(() => {
+    // Initialize OverlayScrollbars on the body element
+    initialize(document.body)
+  })
+
+  onDestroy(() => {
+    // Destroy the instance when the component is unmounted
+    instance()?.destroy()
+  })
 </script>
 
-<div class="bg-background xs:px-8 xs:pb-32 pt-36">
+<div class="bg-background xs:px-8 xs:pb-32 pt-40">
   <!-- Main Content -->
   <div class="max-w-2xl mx-auto flex flex-col">
-      <div class="px-4 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-0 xs:px-8 flex items-center justify-between header-animation ">
-        <div class="flex relative size-12 rounded-full">
-          <span class="absolute inset-0 z-0 animate-spin-slow-2">
-            <span
-              class="absolute inset-0  rounded-full bg-conic from-border to-primary animate-spin-slow"
-            ></span>
-            <span
-              class="absolute inset-0  rounded-full bg-conic from-transparent from-80% to-amber-400 animate-spin-slow blur-[2px]"
-            ></span>
-          </span>
-          <button
-            onclick={handleSummarizeText}
-            class="absolute z-10 inset-px text-primary bg-surface-1 flex items-center justify-center rounded-full disabled:opacity-100"
-            disabled={isLoading}
-          >
-            {#if isLoading}
-              <Icon
-                width={24}
-                icon="mingcute:loading-3-fill"
-                class="animate-spin"
-              />
-            {:else}
-              <Icon
-                class="translate-x-0.5"
-                width={24}
-                icon="heroicons:play-solid"
-              />
-            {/if}
-          </button>
-        </div>
-        <div class="flex"><Settingbar /></div>
-
+    <div
+      class="px-4 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-0 xs:px-8 flex items-center justify-between header-animation"
+    >
+      <div class="flex relative size-12 rounded-full">
+        <span class="absolute inset-0 z-0 animate-spin-slow-2">
+          <span
+            class="absolute inset-0 rounded-full bg-conic from-border to-primary animate-spin-slow"
+          ></span>
+          <span
+            class="absolute inset-0 rounded-full bg-conic from-transparent from-80% to-amber-400 animate-spin-slow blur-[2px]"
+          ></span>
+        </span>
+        <button
+          onclick={handleSummarizeText}
+          class="absolute z-10 inset-px text-primary bg-surface-1 flex items-center justify-center rounded-full disabled:opacity-100"
+          disabled={isLoading}
+        >
+          {#if isLoading}
+            <Icon
+              width={24}
+              icon="mingcute:loading-3-fill"
+              class="animate-spin"
+            />
+          {:else}
+            <Icon
+              class="translate-x-0.5"
+              width={24}
+              icon="heroicons:play-solid"
+            />
+          {/if}
+        </button>
+      </div>
+      <div class="flex"><Settingbar /></div>
     </div>
     <!-- Loading Indicator -->
     {#if isLoading}
@@ -130,8 +153,6 @@
         {@html summary}
       </div>
     {/if}
-
-   
   </div>
   <div
     class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-30"

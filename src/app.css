@@ -63,16 +63,42 @@ body {
 }
 
 @keyframes shrink-and-fade {
-  
-  0% {
-    transform: scale(1); /* Kích thước bình thường */
-    opacity: 1;        /* Hoàn toàn rõ nét */
+  10% {
+    transform: scale(1) translateY(0); /* Kích thước bình thường */
+    opacity: 1; /* Hoàn toàn rõ nét */
   }
-
-
 
   100% {
-    transform: scale(0.9); /* Thu nhỏ còn 80% */
-     opacity: 0;        
+    transform: scale(0.9) translateY(-100px); /* Thu nhỏ còn 80% */
+    opacity: 0.2;
   }
 }
+
+/* Custom OverlayScrollbars Theme */
+.os-theme-custom-app.os-scrollbar {
+  --os-size: 6px;
+  --os-padding-perpendicular: 2px;
+  --os-padding-axis: 2px;
+  --os-track-border-radius: 10px;
+  --os-track-bg: transparent; /* Nền track trong suốt */
+  --os-handle-border-radius: 10px;
+  --os-handle-bg: oklch(0.77 0.003 106.6 / 40%); /* Màu handle mặc định */
+  --os-handle-bg-hover: var(--color-text-secondary); /* Màu handle khi hover */
+  --os-handle-bg-active: var(--color-text-primary); /* Màu handle khi active */
+}
+
+/* Kiểu dáng cụ thể cho track và handle bên trong theme */
+.os-theme-custom-app .os-scrollbar-track {
+  /* Có thể thêm kiểu dáng riêng cho track nếu cần */
+}
+
+.os-theme-custom-app .os-scrollbar-handle {
+  /* Đảm bảo handle có kích thước tối thiểu nếu cần */
+  min-width: 6px; /* Cho thanh ngang */
+  min-height: 6px; /* Cho thanh dọc */
+}
+
+/* Chỉ áp dụng cho thanh cuộn dọc nếu cần */
+/* .os-theme-custom-app.os-scrollbar-vertical {
+  --os-size: 10px;
+} */
