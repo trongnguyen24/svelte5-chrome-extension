@@ -30,6 +30,10 @@ body {
   color: var(--color-text-primary);
 }
 
+button {
+  @apply cursor-pointer;
+}
+
 .settingbar button {
   @apply p-1 hover:bg-surface-2 rounded-md  transition-colors duration-150;
 }
@@ -63,7 +67,7 @@ body {
 }
 
 @keyframes shrink-and-fade {
-  10% {
+  2% {
     transform: scale(1) translateY(0); /* Kích thước bình thường */
     opacity: 1; /* Hoàn toàn rõ nét */
   }

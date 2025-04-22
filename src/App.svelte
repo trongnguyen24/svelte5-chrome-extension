@@ -7,6 +7,7 @@
   import 'overlayscrollbars/overlayscrollbars.css' // Import CSS overlayscrollbars
   import { useOverlayScrollbars } from 'overlayscrollbars-svelte' // Import primitive
   import { onMount, onDestroy } from 'svelte' // Import lifecycle functions
+  import { slideScaleFade } from './lib/slideScaleFade.js'
 
   let textToSummarize = $state('')
   let summary = $state('')
@@ -19,6 +20,7 @@
     summary = ''
     isLoading = true
     let pageContent = '' // Variable to store content from the tab
+    let isYouTubeVideo = false
 
     try {
       // Check if running in Chrome extension context
@@ -33,42 +35,99 @@
         active: true,
         currentWindow: true,
       })
-      if (!tab || !tab.id) {
-        throw new Error('Không tìm thấy tab đang hoạt động.')
+      if (!tab || !tab.id || !tab.url) {
+        throw new Error('Không tìm thấy tab đang hoạt động hoặc URL của tab.')
       }
 
-      // 2. Execute script to get body text
-      const results = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => document.body.innerText, // Function to extract text
-      })
+      // Check if it's a YouTube video page
+      isYouTubeVideo = tab.url.includes('youtube.com/watch')
 
-      // Check if script execution was successful and returned a result
-      if (!results || results.length === 0 || !results[0].result) {
-        // Try getting text content as a fallback
-        const fallbackResults = await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => document.body.textContent,
-        })
-        if (
-          !fallbackResults ||
-          fallbackResults.length === 0 ||
-          !fallbackResults[0].result
-        ) {
-          throw new Error('Không thể lấy nội dung văn bản từ trang web.')
+      if (isYouTubeVideo) {
+        // 2a. It's a YouTube video -> Get transcript from content script
+        console.log('YouTube video detected. Requesting transcript...')
+        try {
+          const response = await chrome.tabs.sendMessage(tab.id, {
+            action: 'fetchTranscript',
+            lang: 'en', // Hoặc lấy từ cài đặt nếu có
+          })
+
+          console.log('Response from content script:', response)
+
+          if (response && response.success && response.transcript) {
+            pageContent = response.transcript
+            console.log(
+              'Transcript received:',
+              pageContent.substring(0, 100) + '...'
+            )
+          } else {
+            throw new Error(
+              response?.error || 'Không thể lấy transcript từ video YouTube.'
+            )
+          }
+        } catch (err) {
+          console.error(
+            'Error sending/receiving message to content script:',
+            err
+          )
+          // Kiểm tra xem lỗi có phải do content script không tồn tại/không phản hồi không
+          if (
+            err.message.includes('Could not establish connection') ||
+            err.message.includes('Receiving end does not exist')
+          ) {
+            throw new Error(
+              'Không thể kết nối với trang YouTube để lấy transcript. Hãy thử tải lại trang YouTube và tiện ích.'
+            )
+          } else {
+            throw err // Ném lại lỗi gốc nếu không phải lỗi kết nối
+          }
         }
-        pageContent = fallbackResults[0].result
       } else {
-        pageContent = results[0].result
+        // 2b. Not a YouTube video -> Execute script to get body text
+        console.log('Not a YouTube video. Getting page content...')
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => document.body.innerText, // Function to extract text
+        })
+
+        // Check if script execution was successful and returned a result
+        if (!results || results.length === 0 || !results[0].result) {
+          // Try getting text content as a fallback
+          console.log('innerText failed, trying textContent...')
+          const fallbackResults = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => document.body.textContent,
+          })
+          if (
+            !fallbackResults ||
+            fallbackResults.length === 0 ||
+            !fallbackResults[0].result
+          ) {
+            throw new Error('Không thể lấy nội dung văn bản từ trang web.')
+          }
+          pageContent = fallbackResults[0].result
+          console.log('textContent successful.')
+        } else {
+          pageContent = results[0].result
+          console.log('innerText successful.')
+        }
       }
 
       if (!pageContent || pageContent.trim() === '') {
-        throw new Error('Trang web không có nội dung văn bản để tóm tắt.')
+        throw new Error(
+          isYouTubeVideo
+            ? 'Video không có transcript hoặc không thể lấy transcript.'
+            : 'Trang web không có nội dung văn bản để tóm tắt.'
+        )
       }
 
       // 3. Get API key and summarize
+      console.log('Getting API key and summarizing...')
       const apiKey = await getApiKey()
-      const summarizedText = await summarizeWithGemini(pageContent, apiKey)
+      const summarizedText = await summarizeWithGemini(
+        pageContent,
+        apiKey,
+        isYouTubeVideo
+      )
       summary = marked.parse(summarizedText) // Parse Markdown result
     } catch (e) {
       console.error('Summarization error:', e)
@@ -104,33 +163,41 @@
     <div
       class="px-4 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-0 xs:px-8 flex items-center justify-between header-animation"
     >
-      <div class="flex relative size-12 rounded-full">
-        <span class="absolute inset-0 z-0 animate-spin-slow-2">
+      <div class="flex group relative size-12 rounded-full">
+        <span
+          class="absolute group-hover:-translate-y-0.5 transition-all duration-300 inset-0 z-0 animate-spin-slow-2"
+        >
           <span
-            class="absolute inset-0 rounded-full bg-conic from-border to-primary animate-spin-slow"
+            class="absolute inset-0 rounded-full bg-conic from-border to-primary group-hover:brightness-150 transition-all duration-300 animate-spin-slow"
           ></span>
           <span
-            class="absolute inset-0 rounded-full bg-conic from-transparent from-80% to-amber-400 animate-spin-slow blur-[2px]"
+            class="absolute inset-0 rounded-full bg-conic from-transparent from-80% to-amber-400 group-hover:to-amber-50 transition-all duration-150 animate-spin-slow blur-[2px]"
           ></span>
         </span>
         <button
           onclick={handleSummarizeText}
-          class="absolute z-10 inset-px text-primary bg-surface-1 flex items-center justify-center rounded-full disabled:opacity-100"
+          class="absolute z-10 inset-px text-primary bg-surface-1 group-hover:brightness-110 group-hover:shadow-md group-hover:shadow-primary/50 group-hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center rounded-full disabled:cursor-progress"
           disabled={isLoading}
         >
-          {#if isLoading}
-            <Icon
-              width={24}
-              icon="mingcute:loading-3-fill"
-              class="animate-spin"
-            />
-          {:else}
-            <Icon
-              class="translate-x-0.5"
-              width={24}
-              icon="heroicons:play-solid"
-            />
-          {/if}
+          <div class="relative size-6">
+            {#if isLoading}
+              <span transition:slideScaleFade>
+                <Icon
+                  width={24}
+                  icon="svg-spinners:bouncing-ball"
+                  class="absolute inset-0"
+                />
+              </span>
+            {:else}
+              <span transition:slideScaleFade>
+                <Icon
+                  class="translate-x-0.5 absolute inset-0"
+                  width={24}
+                  icon="heroicons:play-solid"
+                />
+              </span>
+            {/if}
+          </div>
         </button>
       </div>
       <div class="flex"><Settingbar /></div>
@@ -157,5 +224,7 @@
   <div
     class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-30"
   ></div>
-  <!-- Settings Sidebar -->
+  <div class="fixed z-50 top-0 right-0">
+    <Setting />
+  </div>
 </div>

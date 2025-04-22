@@ -11,6 +11,7 @@ export default defineConfig({
         // Add input configuration
         main: 'index.html', // Keep the default entry point
         background: 'src/background.js', // Add background script as an entry point
+        youtubetranscript: 'src/youtubetranscript.js', // Add youtube-transcript.js as an entry point
       },
       output: {
         entryFileNames: `assets/[name].js`,

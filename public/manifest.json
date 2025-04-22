@@ -12,6 +12,13 @@
     "service_worker": "assets/background.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/watch*"],
+      "js": ["assets/youtubetranscript.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_title": "Mở trình tóm tắt"
   },
