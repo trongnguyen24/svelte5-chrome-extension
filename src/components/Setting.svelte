@@ -90,7 +90,9 @@
 </script>
 
 <!-- Apply Tailwind classes for overall layout and styling -->
-<div class="p-4 h-full bg-surface-1 w-64 flex-shrink-0 flex flex-col gap-5">
+<div
+  class="p-4 bg-surface-1 border-t border-border/50 rounded-2xl w-full flex-shrink-0 flex flex-col gap-5"
+>
   <h2 class="text-lg font-semibold text-text-base">Cài đặt</h2>
 
   <!-- API Key Section -->

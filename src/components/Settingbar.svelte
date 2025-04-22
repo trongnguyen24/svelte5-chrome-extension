@@ -1,9 +1,12 @@
 <script>
   import Icon from '@iconify/svelte'
+  import Settingpopup from './Settingpopup.svelte'
+  import '../app.css'
   import { onMount } from 'svelte'
 
   let currentLength = $state('')
   let currentFormat = $state('')
+  let isSettingPopupOpen = $state(false)
 
   onMount(() => {
     if (
@@ -53,9 +56,7 @@
   }
 
   function openSettings() {
-    // Logic để mở trang cài đặt chi tiết (ví dụ: gửi event hoặc thay đổi state ở component cha)
-    console.log('Mở cài đặt')
-    // Ví dụ: dispatch('openevent');
+    isSettingPopupOpen = true
   }
 </script>
 
@@ -108,7 +109,7 @@
       </button>
     </div>
   </div>
-
+  <Settingpopup bind:open={isSettingPopupOpen} />
 </div>
 
 <style>

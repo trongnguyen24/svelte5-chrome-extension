@@ -1,5 +1,4 @@
 <script>
-  import Setting from './components/Setting.svelte'
   import Settingbar from './components/Settingbar.svelte'
   import Icon from '@iconify/svelte'
   import { marked } from 'marked' // Import marked để render Markdown
@@ -224,7 +223,5 @@
   <div
     class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-30"
   ></div>
-  <div class="fixed z-50 top-0 right-0">
-    <Setting />
-  </div>
+  <div class="fixed z-50 top-0 right-0"></div>
 </div>
