@@ -1,60 +1,76 @@
-// src/lib/transitions/slideScaleFade.js (Ví dụ về vị trí file)
-
-import { cubicOut } from 'svelte/easing' // Import easing function mặc định
+import { cubicOut } from 'svelte/easing'
 
 /**
- * Transition tùy chỉnh kết hợp trượt, scale và thay đổi opacity.
- * Hoạt động cho cả `in:` và `out:`.
- *
- * @param {Element} node - Phần tử DOM được áp dụng transition.
- * @param {object} params - Các tham số tùy chỉnh.
- * @param {number} [params.delay=0] - Độ trễ trước khi bắt đầu (ms).
- * @param {number} [params.duration=400] - Thời gian diễn ra transition (ms).
- * @param {function} [params.easing=cubicOut] - Hàm easing function (vd: cubicOut từ svelte/easing).
- * @param {number} [params.x=0] - Khoảng cách trượt ngang (px). Dương là sang phải, âm là sang trái.
- * @param {number} [params.y=0] - Khoảng cách trượt dọc (px). Dương là xuống dưới, âm là lên trên.
- * @param {number} [params.opacity=0] - Giá trị opacity khởi đầu (cho `in`) hoặc kết thúc (cho `out`). Mặc định là 0 (hoàn toàn trong suốt).
- * @param {number} [params.scale=0] - Giá trị scale khởi đầu (cho `in`) hoặc kết thúc (cho `out`). Mặc định là 0 (kích thước bằng 0).
- * @returns {import('svelte/transition').TransitionConfig} - Cấu hình transition cho Svelte.
+ * @typedef {Object} SlideScaleFadeParams
+ * @property {number} [delay=0] - Thời gian trễ (ms)
+ * @property {number} [duration=400] - Thời gian thực hiện transition (ms)
+ * @property {(t: number) => number} [easing=cubicOut] - Easing function
+ * @property {'left' | 'right' | 'top' | 'bottom'} [slideFrom='top'] - Hướng trượt vào/ra
+ * @property {string} [slideDistance='30px'] - Khoảng cách trượt (ví dụ: '50px', '100%')
+ * @property {number} [startScale=0.95] - Tỷ lệ scale ban đầu (ví dụ: 0.8 cho nhỏ hơn, 1.2 cho lớn hơn)
+ * @property {number} [startOpacity=0] - Độ mờ ban đầu (thường là 0 cho 'in')
  */
-export function slideScaleFade(
-  node,
-  {
-    delay = 0,
-    duration = 400,
-    easing = cubicOut,
-    x = 0,
-    y = -50,
-    opacity = 0,
-    scale = 0.9,
-  }
-) {
-  const style = getComputedStyle(node)
-  const target_opacity = +style.opacity // Opacity cuối cùng của phần tử (thường là 1)
-  const target_transform = style.transform === 'none' ? '' : style.transform // Transform cuối cùng
 
-  // Tính toán sự khác biệt so với trạng thái cuối cùng
-  const opacity_diff = target_opacity * (1 - opacity) // Khác biệt opacity
-  const scale_diff = 1 * (1 - scale) // Khác biệt scale (scale cuối cùng là 1)
-  // x và y là độ lệch ban đầu/cuối cùng so với vị trí cuối
+/**
+ * Svelte 5 transition kết hợp slide, scale, và fade.
+ * Hoạt động tốt cho cả `in:` và `out:`.
+ * @param {Element} node - Phần tử DOM (không dùng trực tiếp trong Svelte 5 css function nhưng là một phần của signature)
+ * @param {SlideScaleFadeParams} [params] - Các tham số tùy chỉnh
+ * @returns {import('svelte/transition').TransitionConfig}
+ */
+export function slideScaleFade(node, params = {}) {
+  const {
+    delay = 0,
+    duration = 400, // Giảm duration mặc định một chút
+    easing = cubicOut,
+    slideFrom = 'top',
+    slideDistance = '2rem',
+    startScale = 0.9,
+    startOpacity = 0,
+  } = params
+
+  // Tách giá trị số và đơn vị từ slideDistance
+  const distanceValue = parseFloat(slideDistance)
+  const distanceUnit = slideDistance.replace(/[\d.-]/g, '') || 'px' // Mặc định là px nếu không có đơn vị
 
   return {
     delay,
     duration,
     easing,
-    css: (t, u) => `
-            transform-origin: center center; /* Đảm bảo scale từ tâm */
-            transform: ${target_transform}
-                       translate(${(1 - t) * x}px, ${(1 - t) * y}px)
-                       scale(${1 - scale_diff * u});
-            opacity: ${target_opacity - opacity_diff * u};
-        `,
-    /*
-         Giải thích logic nội suy (t chạy từ 0 đến 1, u = 1 - t):
-         - t=0 (bắt đầu): u=1 => translate(x, y) scale(1 - scale_diff) => scale(scale), opacity(target - opacity_diff) => opacity(opacity)
-         - t=1 (kết thúc): u=0 => translate(0, 0) scale(1), opacity(target)
-         Hàm này nội suy TỪ trạng thái lệch (x, y, scale, opacity) VỀ trạng thái tự nhiên của phần tử.
-         Svelte sử dụng nó cho cả IN (vào trạng thái tự nhiên) và OUT (ra khỏi trạng thái tự nhiên).
-        */
+    css: (t, u) => {
+      // t: tiến trình từ 0 đến 1 (cho 'in')
+      // u: tiến trình ngược từ 1 đến 0 (1 - t)
+
+      const opacity = startOpacity + (1 - startOpacity) * t // Đi từ startOpacity đến 1
+      const scale = startScale + (1 - startScale) * t // Đi từ startScale đến 1
+
+      let transform = ''
+      const currentDistance = distanceValue * u // Khoảng cách hiện tại, giảm dần về 0 khi t tăng
+
+      switch (slideFrom) {
+        case 'left':
+          transform = `translateX(-${currentDistance}${distanceUnit})`
+          break
+        case 'right':
+          transform = `translateX(${currentDistance}${distanceUnit})`
+          break
+        case 'top':
+          transform = `translateY(-${currentDistance}${distanceUnit})`
+          break
+        case 'bottom':
+          transform = `translateY(${currentDistance}${distanceUnit})`
+          break
+      }
+
+      // Kết hợp các transform
+      const finalTransform = `${transform} scale(${scale})`
+
+      // Trả về chuỗi CSS
+      return `
+				opacity: ${opacity};
+				transform: ${finalTransform};
+				transform-origin: center center; // Đảm bảo scale từ tâm
+			`
+    },
   }
 }

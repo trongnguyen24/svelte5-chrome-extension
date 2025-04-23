@@ -1,12 +1,15 @@
 <script>
   import Icon from '@iconify/svelte'
-  import Settingpopup from './Settingpopup.svelte'
+  import Setting from './Setting.svelte'
+  import { Dialog } from 'bits-ui'
+  import { fade, fly } from 'svelte/transition'
+  import { slideScaleFade } from '../lib/slideScaleFade'
   import '../app.css'
   import { onMount } from 'svelte'
 
   let currentLength = $state('')
   let currentFormat = $state('')
-  let isSettingPopupOpen = $state(false)
+  let isOpen = $state(false)
 
   onMount(() => {
     if (
@@ -34,7 +37,7 @@
       console.warn('Chrome storage API không khả dụng.')
       // Có thể set giá trị mặc định ở đây nếu cần cho môi trường dev
       currentLength = 'medium'
-      currentFormat = 'bullet'
+      currentFormat = 'heading'
     }
   })
 
@@ -54,10 +57,6 @@
       if (key === 'summaryFormat') currentFormat = value
     }
   }
-
-  function openSettings() {
-    isSettingPopupOpen = true
-  }
 </script>
 
 <div
@@ -68,21 +67,21 @@
       <button
         onclick={() => updateSetting('summaryLength', 'short')}
         class:active={currentLength === 'short'}
-        title="Tóm tắt ngắn"
+        title="Short summary"
       >
         <Icon width={16} icon="heroicons:minus-16-solid" />
       </button>
       <button
         onclick={() => updateSetting('summaryLength', 'medium')}
         class:active={currentLength === 'medium'}
-        title="Tóm tắt trung bình"
+        title="Medium summary"
       >
         <Icon width={16} icon="heroicons:bars-2-16-solid" />
       </button>
       <button
         onclick={() => updateSetting('summaryLength', 'long')}
         class:active={currentLength === 'long'}
-        title="Tóm tắt dài"
+        title="Long summary"
       >
         <Icon width={16} icon="heroicons:bars-3-16-solid" />
       </button>
@@ -91,26 +90,61 @@
       <button
         onclick={() => updateSetting('summaryFormat', 'heading')}
         class:active={currentFormat === 'heading'}
-        title="Định dạng tiêu đề cấp độ"
+        title="Heading format"
       >
         <Icon width={16} icon="heroicons:list-bullet-16-solid" />
       </button>
       <button
         onclick={() => updateSetting('summaryFormat', 'paragraph')}
         class:active={currentFormat === 'paragraph'}
-        title="Định dạng đoạn văn"
+        title="Paragraph format"
       >
         <Icon width={16} icon="heroicons:bars-4-16-solid" />
       </button>
     </div>
     <div class="flex p-0.5 gap-0.5">
-      <button onclick={openSettings} title="Mở cài đặt">
+      <button onclick={() => (isOpen = true)} title="Open settings">
         <Icon width={16} icon="heroicons:cog-6-tooth-16-solid" />
       </button>
     </div>
   </div>
-  <Settingpopup bind:open={isSettingPopupOpen} />
 </div>
 
-<style>
-</style>
+<Dialog.Root bind:open={isOpen}>
+  <Dialog.Portal>
+    <Dialog.Overlay class="fixed inset-0 z-40 bg-black/80" forceMount>
+      {#snippet child({ props, open })}
+        {#if open}
+          <div {...props} transition:fade></div>
+        {/if}
+      {/snippet}
+    </Dialog.Overlay>
+    <Dialog.Content
+      forceMount
+      class="outline-hidden fixed left-[50%] top-4 z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%]  sm:max-w-[490px] md:w-full"
+    >
+      {#snippet child({ props, open })}
+        {#if open}
+          <div {...props} transition:slideScaleFade>
+            <div class="absolute z-50 right-3 top-3 group flex gap-2">
+              <span class="block size-3 bg-surface-2 rounded-full"></span>
+              <span class="block size-3 bg-surface-2 rounded-full"></span>
+              <!-- svelte-ignore a11y_consider_explicit_label -->
+              <button
+                onclick={() => (isOpen = false)}
+                class="block size-3 bg-error rounded-full"
+              >
+                <Icon
+                  class="text-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                  width={12}
+                  icon="heroicons:x-mark-16-solid"
+                />
+              </button>
+            </div>
+            <Setting />
+          </div>
+        {/if}
+      {/snippet}
+    </Dialog.Content>
+  </Dialog.Portal>
+</Dialog.Root>

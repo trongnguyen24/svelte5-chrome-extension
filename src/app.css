@@ -32,7 +32,7 @@ body {
 }
 
 button {
-  @apply cursor-pointer;
+  @apply cursor-pointer select-none;
 }
 
 .settingbar button {
@@ -51,12 +51,49 @@ button {
 /*   color: white; */
 /* } */
 
+.setting-length-btn {
+  @apply p-1 text-xs flex flex-col items-center gap-2 text-muted  w-16 transition-colors duration-150;
+}
+
+.setting-length-btn span {
+  @apply px-3 block py-0.5 text-text-secondary rounded-full transition-colors duration-150;
+}
+.setting-length-btn.active {
+  @apply text-text-primary;
+}
+
+.setting-length-btn.active span {
+  @apply text-text-primary bg-surface-2;
+}
+
+.setting-lang-btn {
+  @apply px-3 py-0.5 text-text-secondary rounded-full transition-colors duration-150;
+}
+
+.setting-lang-btn.active {
+  @apply text-text-primary bg-surface-2;
+}
+
+.setting-format-btn {
+  @apply p-1 text-xs flex flex-col items-center gap-2 text-muted   transition-colors duration-150;
+}
+
+.setting-format-btn span {
+  @apply px-3 block py-0.5 text-text-secondary rounded-full transition-colors duration-150;
+}
+.setting-format-btn.active {
+  @apply text-text-primary;
+}
+
+.setting-format-btn.active span {
+  @apply text-text-primary bg-surface-2;
+}
 .animate-spin-slow {
-  animation: spin 4s cubic-bezier(0.11, 0.5, 0.89, 0.5) infinite;
+  animation: spin 6s cubic-bezier(0.1, 0.5, 0.9, 0.5) infinite;
 }
 
 .animate-spin-slow-2 {
-  animation: spin 5s linear infinite;
+  animation: spin 2s cubic-bezier(0.1, 0.5, 0.9, 0.5) infinite;
 }
 
 .header-animation {

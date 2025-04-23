@@ -25,7 +25,7 @@
       // Check if running in Chrome extension context
       if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.scripting) {
         throw new Error(
-          'Không thể truy cập API của Chrome. Đảm bảo bạn đang chạy trong môi trường extension.'
+          'Cannot access Chrome API. Ensure you are running in an extension environment.'
         )
       }
 
@@ -35,7 +35,7 @@
         currentWindow: true,
       })
       if (!tab || !tab.id || !tab.url) {
-        throw new Error('Không tìm thấy tab đang hoạt động hoặc URL của tab.')
+        throw new Error('Could not find the active tab or its URL.')
       }
 
       // Check if it's a YouTube video page
@@ -60,7 +60,8 @@
             )
           } else {
             throw new Error(
-              response?.error || 'Không thể lấy transcript từ video YouTube.'
+              response?.error ||
+                'Could not retrieve transcript from YouTube video.'
             )
           }
         } catch (err) {
@@ -74,7 +75,7 @@
             err.message.includes('Receiving end does not exist')
           ) {
             throw new Error(
-              'Không thể kết nối với trang YouTube để lấy transcript. Hãy thử tải lại trang YouTube và tiện ích.'
+              'Could not connect to the YouTube page to get the transcript. Try reloading the YouTube page and the extension.'
             )
           } else {
             throw err // Ném lại lỗi gốc nếu không phải lỗi kết nối
@@ -101,7 +102,9 @@
             fallbackResults.length === 0 ||
             !fallbackResults[0].result
           ) {
-            throw new Error('Không thể lấy nội dung văn bản từ trang web.')
+            throw new Error(
+              'Could not retrieve text content from the web page.'
+            )
           }
           pageContent = fallbackResults[0].result
           console.log('textContent successful.')
@@ -114,8 +117,8 @@
       if (!pageContent || pageContent.trim() === '') {
         throw new Error(
           isYouTubeVideo
-            ? 'Video không có transcript hoặc không thể lấy transcript.'
-            : 'Trang web không có nội dung văn bản để tóm tắt.'
+            ? 'Video has no transcript or transcript could not be retrieved.'
+            : 'The web page has no text content to summarize.'
         )
       }
 
@@ -130,7 +133,7 @@
       summary = marked.parse(summarizedText) // Parse Markdown result
     } catch (e) {
       console.error('Summarization error:', e)
-      error = e.message || 'Đã xảy ra lỗi không mong muốn.'
+      error = e.message || 'An unexpected error occurred.'
     } finally {
       isLoading = false
     }
@@ -175,7 +178,7 @@
         </span>
         <button
           onclick={handleSummarizeText}
-          class="absolute z-10 inset-px text-primary bg-surface-1 group-hover:brightness-110 group-hover:shadow-md group-hover:shadow-primary/50 group-hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center rounded-full disabled:cursor-progress"
+          class="absolute z-10 inset-px text-primary bg-surface-1 group-hover:brightness-110 group-hover:shadow-lg group-hover:shadow-primary/30 group-hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center rounded-full disabled:cursor-progress"
           disabled={isLoading}
         >
           <div class="relative size-6">
@@ -203,18 +206,28 @@
     </div>
     <!-- Loading Indicator -->
     {#if isLoading}
-      <div class="text-center">Đang xử lý...</div>
+      <div class="text-center">Processing...</div>
     {/if}
 
     <!-- Error Message -->
     {#if error}
-      <div class="text-center text-red-500 mt-4">Lỗi: {error}</div>
+      <div class="flex gap-2 w-fit mx-auto text-red-400 mt-4">
+        <Icon
+          class="mt-0.5"
+          width={16}
+          icon="heroicons:exclamation-circle-16-solid"
+        />
+        <p class="text-sm">
+          <span class="font-bold">Error:</span> <br />
+          {error}
+        </p>
+      </div>
     {/if}
 
     <!-- Summary Result -->
     {#if summary}
       <div
-        class="p-4 xs:p-8 pb-24 relative z-20 prose dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+        class="p-4 xs:p-8 pb-24 relative z-20 prose prose-invert dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
       >
         {@html summary}
       </div>

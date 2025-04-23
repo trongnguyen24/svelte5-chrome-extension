@@ -23,7 +23,9 @@ export async function getApiKey() {
 
 export async function summarizeWithGemini(text, apiKey, isYouTube = false) {
   if (!apiKey) {
-    throw new Error('Chưa cấu hình API key Gemini.')
+    throw new Error(
+      'Gemini API key is not configured. Click the settings icon on the right to add your API key.'
+    )
   }
   const options = await getSummaryOptions() // Sử dụng hàm đã import tĩnh
   const prompt = buildPrompt(text, options, isYouTube) // Truyền isYouTube
@@ -47,25 +49,25 @@ export async function summarizeWithGemini(text, apiKey, isYouTube = false) {
     if (!res.ok) {
       console.error('Gemini API Error Response:', data)
       if (data.error && data.error.message) {
-        throw new Error('Gemini API: ' + data.error.message)
+        throw new Error('Gemini API Error: ' + data.error.message)
       } else {
-        throw new Error('Lỗi không xác định từ Gemini API')
+        throw new Error('Unknown error from Gemini API')
       }
     }
     if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text)
-      throw new Error('Không nhận được kết quả tóm tắt hợp lệ từ API.')
+      throw new Error('Did not receive a valid summary result from the API.')
     return data.candidates[0].content.parts[0].text
   } catch (e) {
     console.error('Fetch error:', e)
     // Check if the error is a network error or CORS issue
     if (e instanceof TypeError && e.message.includes('NetworkError')) {
       throw new Error(
-        'Lỗi mạng khi gọi Gemini API. Kiểm tra kết nối và cài đặt CORS.'
+        'Network error calling Gemini API. Check connection and CORS settings.'
       )
     } else if (e.message.includes('API key')) {
       throw e // Re-throw API key specific errors
     } else {
-      throw new Error('Đã xảy ra lỗi khi gọi Gemini API.')
+      throw new Error('An error occurred while calling the Gemini API.')
     }
   }
 }
