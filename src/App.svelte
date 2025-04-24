@@ -43,7 +43,46 @@
 
       if (isYouTubeVideo) {
         // 2a. It's a YouTube video -> Get transcript from content script
-        console.log('YouTube video detected. Requesting transcript...')
+        console.log('YouTube video detected. Checking for content script...')
+        try {
+          // Attempt to ping the content script to see if it's loaded
+          // Use a specific action that the content script listens for to confirm its presence
+          await chrome.tabs.sendMessage(tab.id, { action: 'pingYouTubeScript' })
+          console.log('Content script already loaded.')
+        } catch (pingError) {
+          // If ping fails, assume content script is not injected or not responding
+          if (
+            pingError.message.includes('Could not establish connection') ||
+            pingError.message.includes('Receiving end does not exist')
+          ) {
+            console.log('Content script not found. Injecting...')
+            try {
+              // Ensure the file path matches the one declared in manifest.json's web_accessible_resources
+              await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['assets/youtubetranscript.js'], // Updated path
+              })
+              console.log('Content script injected successfully.')
+              // Add a small delay to allow the script to load and initialize
+              await new Promise((resolve) => setTimeout(resolve, 200)) // Wait 200ms
+            } catch (injectionError) {
+              console.error('Failed to inject content script:', injectionError)
+              throw new Error(
+                `Failed to inject the script into the YouTube page. Please try reloading the page and the extension. Details: ${injectionError.message}`
+              )
+            }
+          } else {
+            // Re-throw other errors encountered during ping
+            console.error('Error pinging content script:', pingError)
+            // It's possible the page is still loading or the script is temporarily unresponsive
+            throw new Error(
+              `Could not communicate with the YouTube page's script. It might be loading or unresponsive. Details: ${pingError.message}`
+            )
+          }
+        }
+
+        // Now, try to fetch the transcript
+        console.log('Requesting transcript...')
         try {
           const response = await chrome.tabs.sendMessage(tab.id, {
             action: 'fetchTranscript',
@@ -59,26 +98,27 @@
               pageContent.substring(0, 100) + '...'
             )
           } else {
+            // Handle cases where the script runs but can't find the transcript or errors internally
             throw new Error(
               response?.error ||
-                'Could not retrieve transcript from YouTube video.'
+                'Could not retrieve transcript from YouTube video. The content script might not have found the transcript panel or encountered an issue.'
             )
           }
         } catch (err) {
           console.error(
-            'Error sending/receiving message to content script:',
+            'Error sending/receiving transcript request message:',
             err
           )
-          // Kiểm tra xem lỗi có phải do content script không tồn tại/không phản hồi không
+          // Provide a more specific error if connection failed after injection attempt
           if (
             err.message.includes('Could not establish connection') ||
             err.message.includes('Receiving end does not exist')
           ) {
             throw new Error(
-              'Could not connect to the YouTube page to get the transcript. Try reloading the YouTube page and the extension.'
+              'Could not connect to the YouTube page to get the transcript, even after attempting to load the necessary script. Please try reloading the YouTube page and the extension.'
             )
           } else {
-            throw err // Ném lại lỗi gốc nếu không phải lỗi kết nối
+            throw err // Re-throw other errors, potentially from the content script itself
           }
         }
       } else {
@@ -151,6 +191,21 @@
   onMount(() => {
     // Initialize OverlayScrollbars on the body element
     initialize(document.body)
+    try {
+      if (
+        localStorage.theme === 'dark' ||
+        (!('theme' in localStorage) &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        document.documentElement.classList.add('dark')
+        console.log('Applied dark theme.')
+      } else {
+        document.documentElement.classList.remove('dark')
+        console.log('Applied light theme.')
+      }
+    } catch (error) {
+      console.error('Error applying theme:', error)
+    }
   })
 
   onDestroy(() => {
@@ -227,11 +282,54 @@
     <!-- Summary Result -->
     {#if summary}
       <div
-        class="p-4 xs:p-8 pb-24 relative z-20 prose prose-invert dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+        class="p-4 xs:p-8 pb-24 relative z-20 prose dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
       >
         {@html summary}
       </div>
     {/if}
+    <div
+      class="p-4 xs:p-8 pb-24 relative z-20 dark:prose-invert prose w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+    >
+      <h3>Tóm tắt Trang Chủ Radix (phiên bản dài)</h3>
+      <h4>Giới thiệu Radix</h4>
+      <p>
+        Radix là một hệ thống thiết kế được tạo bởi WorkOS, cung cấp các thành
+        phần giao diện người dùng (UI) sẵn sàng sử dụng. Trang chủ giới thiệu
+        các yếu tố chính bao gồm: Themes (chủ đề), Primitives (nguyên tố cơ
+        bản), Icons (biểu tượng), Colors (màu sắc), và Documentation (tài liệu).
+        Người dùng có thể tạo bảng màu tùy chỉnh.
+      </p>
+      <h4>Thành phần thiết kế</h4>
+      <p>
+        Radix cung cấp một bộ sưu tập các thành phần giao diện người dùng, bao
+        gồm: Box, Grid, Image, và Text. Các thành phần này được mô tả là "đầy đủ
+        tính năng" và được xây dựng với Radix, mã nguồn mở.
+      </p>
+      <h4>Hệ thống màu sắc</h4>
+      <p>
+        Hệ thống màu sắc của Radix bao gồm các bảng màu Light (sáng), Dark
+        (tối), Accent (nhấn), Gray (xám), và Background (nền). Người dùng có thể
+        tùy chỉnh bảng màu với các lựa chọn màu sắc chi tiết, ví dụ như 12 sắc
+        thái của màu cam (orange) và xám (gray).
+      </p>
+      <h4>Tài liệu và Hỗ trợ</h4>
+      <p>
+        Trang chủ cung cấp liên kết đến tài liệu hướng dẫn sử dụng. Ngoài ra, có
+        một phần blog và một biểu mẫu đăng ký tài khoản.
+      </p>
+      <h4>Ví dụ về sử dụng</h4>
+      <p>
+        Trang chủ minh họa việc sử dụng Radix thông qua các ví dụ về việc tạo
+        các thành phần giao diện người dùng.
+      </p>
+      <h4>Thông tin khác</h4>
+      <p>
+        Trang chủ cũng hiển thị thông tin liên hệ, một số tác vụ cần thực hiện
+        (ví dụ: trả lời bình luận, mời nhóm vào Slack, tạo báo cáo), và một
+        trích dẫn ngắn về Susan Kare, một nhà thiết kế đồ họa nổi tiếng. Có một
+        lời nhắc nhở nâng cấp lên phiên bản mới.
+      </p>
+    </div>
   </div>
   <div
     class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-30"

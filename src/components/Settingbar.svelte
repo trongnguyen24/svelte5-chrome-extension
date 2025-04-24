@@ -121,12 +121,14 @@
     </Dialog.Overlay>
     <Dialog.Content
       forceMount
-      class="outline-hidden fixed left-[50%] top-4 z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%]  sm:max-w-[490px] md:w-full"
+      class="outline-hidden fixed left-[50%] top-4 px-4 xs:px-8 max-w-2xl z-50 w-full translate-x-[-50%]"
     >
       {#snippet child({ props, open })}
         {#if open}
           <div {...props} transition:slideScaleFade>
-            <div class="absolute z-50 right-3 top-3 group flex gap-2">
+            <div
+              class="absolute z-50 right-7 xs:right-11 top-3 group flex gap-2"
+            >
               <span class="block size-3 bg-surface-2 rounded-full"></span>
               <span class="block size-3 bg-surface-2 rounded-full"></span>
               <!-- svelte-ignore a11y_consider_explicit_label -->

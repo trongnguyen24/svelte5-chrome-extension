@@ -127,7 +127,7 @@
           </p>
         {/if}
         <a
-          href="https://aistudio.google.com/u/1/apikey"
+          href="https://aistudio.google.com/app/apikey"
           target="_blank"
           class="text-xs flex items-center gap-0.5 text-primary hover:underline"
           >Get a key <Icon
@@ -249,6 +249,16 @@
         >
           English
         </button>
+        <!-- Thêm nút cho ngôn ngữ khác nếu cần -->
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <!-- svelte-ignore a11y_label_has_associated_control -->
+      <label class="block text-muted">Theme</label>
+      <div class="flex p-0.5 gap-1">
+        <button class="setting-lang-btn" title="Light"> Light </button>
+        <button class="setting-lang-btn" title="Dark"> Dark </button>
+        <button class="setting-lang-btn active" title="System"> System </button>
         <!-- Thêm nút cho ngôn ngữ khác nếu cần -->
       </div>
     </div>

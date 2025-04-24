@@ -4,6 +4,25 @@
 
 @theme {
   --breakpoint-xs: 38rem;
+
+  /* Color scheme */
+  --color-scheme: light;
+
+  --color-background: oklch(93.1% 0.0061 277.7);
+  --color-surface-1: oklch(95.6% 0.0045 277.7);
+  --color-surface-2: oklch(99.1% 0.0015 277.7);
+  --color-border: oklch(88.8% 0.0093 277.7);
+  --color-text-primary: oklch(50.3% 0.0139 277.7);
+  --color-text-secondary: oklch(79.4% 0.016 277.7);
+  --color-muted: oklch(85.3% 0.0117 277.7);
+  --color-primary: oklch(69.1% 0.1909 45.02);
+  --color-success: oklch(0.768 0.233 130.85);
+  --color-error: oklch(0.637 0.237 25.331);
+}
+.dark {
+  /* Color scheme */
+  --color-scheme: dark;
+
   --color-background: oklch(0.23 0.0041 264.49); /* Gray 1 */
   --color-surface-1: oklch(29.9% 0.0044 271.2); /* Gray 3 */
   --color-surface-2: oklch(32.3% 0.0056 271.2); /* Gray 4 */
@@ -20,15 +39,6 @@
   --color-success: oklch(0.768 0.233 130.85);
   --color-warning: oklch(0.795 0.184 86.047);
   --color-error: oklch(0.637 0.237 25.331);
-}
-
-body {
-  width: 100%;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
 }
 
 button {
@@ -86,6 +96,14 @@ button {
 }
 
 .setting-format-btn.active span {
+  @apply text-text-primary bg-surface-2;
+}
+
+.setting-theme-btn {
+  @apply px-3 py-0.5 text-text-secondary rounded-full transition-colors duration-150;
+}
+
+.setting-theme-btn.active {
   @apply text-text-primary bg-surface-2;
 }
 .animate-spin-slow {
