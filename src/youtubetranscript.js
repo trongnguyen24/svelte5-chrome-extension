@@ -211,7 +211,189 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: false, error: error.message })
       })
     return true // Giữ kênh message mở cho phản hồi bất đồng bộ
+  } else if (request.action === 'fetchTranscriptWithTimestamp') {
+    console.log('Content script received fetchTranscriptWithTimestamp request')
+    getTranscriptWithTimestamp()
+      .then((transcript) => {
+        if (transcript) {
+          console.log(
+            'Timestamped transcript fetched, sending response (first 100 chars):',
+            transcript.substring(0, 100) + '...'
+          )
+          sendResponse({ success: true, transcript: transcript })
+        } else {
+          console.log(
+            'Failed to get timestamped transcript, sending error response'
+          )
+          sendResponse({
+            success: false,
+            error: 'Failed to get timestamped transcript.',
+          })
+        }
+      })
+      .catch((error) => {
+        console.error(
+          'Error handling fetchTranscriptWithTimestamp message:',
+          error
+        )
+        sendResponse({ success: false, error: error.message })
+      })
+    return true // Giữ kênh message mở
   }
 })
 
 console.log('YouTube Transcript Content Script Loaded.') // Để xác nhận script đã load
+
+export async function getTranscriptWithTimestamp() {
+  // --- Cấu hình ---
+  const maxRetries = 3 // Số lần thử lại tối đa
+  const waitAfterClickMs = 1000 // Thời gian chờ (ms) sau khi nhấn nút transcript
+  const waitBetweenRetriesMs = 1500 // Thời gian chờ (ms) giữa các lần thử lại
+
+  console.log(
+    `[Transcript] Bắt đầu lấy transcript KÈM THỜI GIAN (Tối đa ${maxRetries} lần thử)...`
+  )
+
+  // --- Hàm phụ trợ ---
+  /** Chờ một khoảng thời gian */
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  /** Trích xuất THỜI GIAN và VĂN BẢN transcript */
+  function extractTranscriptText() {
+    // --- SELECTORS CÓ THỂ CẦN CẬP NHẬT ---
+    const segmentContainerSelector = 'ytd-transcript-segment-renderer' // Selector cho toàn bộ dòng segment (chứa cả time và text)
+    const timestampSelector = '.segment-timestamp, .timestamp' // Thử các class phổ biến cho timestamp bên TRONG segment container
+    const textSelector = 'yt-formatted-string' // Selector cho phần text bên TRONG segment container
+
+    const segmentElements = document.querySelectorAll(segmentContainerSelector)
+
+    if (segmentElements && segmentElements.length > 0) {
+      console.log(
+        `[Transcript] Tìm thấy ${segmentElements.length} khối segment transcript.`
+      )
+      const transcriptLines = []
+
+      for (const segmentElement of segmentElements) {
+        // Tìm timestamp và text bên trong mỗi khối segment
+        const timestampElement = segmentElement.querySelector(timestampSelector)
+        const textElement = segmentElement.querySelector(textSelector)
+
+        const timestamp = timestampElement
+          ? timestampElement.textContent.trim()
+          : '?:??' // Lấy text của timestamp, mặc định là '?:??' nếu không tìm thấy
+        const text = textElement ? textElement.textContent.trim() : '' // Lấy text của nội dung, mặc định là rỗng
+
+        // Chỉ thêm vào kết quả nếu có nội dung text thực sự
+        if (text.length > 0) {
+          transcriptLines.push(`[${timestamp}] ${text}`)
+        } else if (timestamp !== '?:??') {
+          // Nếu chỉ có timestamp mà không có text (ít xảy ra), có thể ghi nhận lại nếu muốn
+          // console.log(`[Transcript] Segment chỉ có timestamp: ${timestamp}`);
+        }
+      }
+
+      if (transcriptLines.length > 0) {
+        const fullText = transcriptLines.join('\n') // Nối các dòng bằng ký tự xuống dòng
+        return fullText
+      } else {
+        console.log(
+          '[Transcript] Tìm thấy các khối segment, nhưng không trích xuất được cặp thời gian/văn bản hợp lệ.'
+        )
+        return null
+      }
+    }
+    console.log(
+      '[Transcript] Không tìm thấy khối segment transcript với selector:',
+      segmentContainerSelector
+    )
+    return null
+  }
+
+  /** Cố gắng mở ô transcript bằng cách click nút trực tiếp */
+  async function tryOpenTranscriptPane_DirectClick() {
+    console.log('[Transcript] Đang thử tìm và nhấp nút transcript trực tiếp...')
+    // --- SELECTOR CÓ THỂ CẦN CẬP NHẬT ---
+    const directButtonSelector =
+      'button[aria-label="Show transcript"], button[aria-label="Hiển thị bản ghi"]'
+
+    const directButton = document.querySelector(directButtonSelector)
+    if (directButton) {
+      console.log(
+        '[Transcript] Tìm thấy nút transcript trực tiếp. Đang nhấp...'
+      )
+      directButton.click()
+      await delay(100) // Chờ một chút sau khi click
+      return true
+    } else {
+      console.error(
+        '[Transcript] Không tìm thấy nút transcript trực tiếp với selector:',
+        directButtonSelector
+      )
+      return false
+    }
+  }
+
+  // --- Logic chính với vòng lặp thử lại ---
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    console.log(`[Transcript] --- Lần thử ${attempt} / ${maxRetries} ---`)
+    try {
+      // 1. Kiểm tra xem transcript đã có sẵn chưa
+      let transcriptText = extractTranscriptText()
+      if (transcriptText) {
+        console.log('[Transcript] Transcript (kèm thời gian) đã có sẵn.')
+        return transcriptText // Trả về kết quả
+      }
+
+      // 2. Nếu chưa có, thử mở ô transcript
+      const clickedSuccessfully = await tryOpenTranscriptPane_DirectClick()
+
+      // Chỉ thử lại nếu click thành công, nếu không thì nút có thể không tồn tại
+      if (clickedSuccessfully) {
+        // 3. Chờ cho transcript tải
+        console.log(
+          `[Transcript] Chờ ${
+            waitAfterClickMs / 1000
+          } giây để transcript tải...`
+        )
+        await delay(waitAfterClickMs)
+
+        // 4. Thử trích xuất lại sau khi chờ
+        transcriptText = extractTranscriptText()
+        if (transcriptText) {
+          console.log(
+            '[Transcript] Đã trích xuất transcript (kèm thời gian) thành công.'
+          )
+          return transcriptText // Trả về kết quả
+        } else {
+          console.log(
+            `[Transcript] Lần thử ${attempt} thất bại: Không tìm thấy transcript (kèm thời gian) sau khi chờ.`
+          )
+        }
+      } else {
+        console.log(
+          `[Transcript] Không thể nhấp nút mở transcript trong lần thử ${attempt}. Dừng thử.`
+        )
+        break // Thoát vòng lặp nếu không tìm thấy nút
+      }
+    } catch (error) {
+      console.error(`[Transcript] Lỗi trong lần thử ${attempt}:`, error)
+    }
+
+    // Chờ trước khi thử lại (nếu chưa phải lần cuối và click thành công)
+    if (attempt < maxRetries) {
+      console.log(
+        `[Transcript] Chờ ${
+          waitBetweenRetriesMs / 1000
+        } giây trước khi thử lại...`
+      )
+      await delay(waitBetweenRetriesMs)
+    }
+  }
+
+  console.error(
+    `[Transcript] Không thể lấy transcript (kèm thời gian) sau ${maxRetries} lần thử.`
+  )
+  return null // Trả về null nếu thất bại
+}

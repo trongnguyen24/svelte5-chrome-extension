@@ -93,8 +93,12 @@
             lang: 'en', // Hoặc lấy từ cài đặt nếu có
           })
 
-          console.log('Response from content script:', response)
+          const response2 = await chrome.tabs.sendMessage(tab.id, {
+            action: 'fetchTranscriptWithTimestamp',
+          })
 
+          console.log('Response from content script:', response)
+          console.log('Response from content script:', response2)
           if (response && response.success && response.transcript) {
             pageContent = response.transcript
             console.log(
@@ -323,7 +327,15 @@
       <div
         class="p-4 xs:p-8 pb-24 relative z-20 prose w-full max-w-2xl bg-surface-1 border border-border/25 border-t-white dark:border-t-neutral-600 xs:shadow-lg xs:rounded-xl"
       >
-        {@html summary}
+        <div
+          class="flex w-fit gap-2 border border-border p-0.5 bg-background rounded-full mb-4"
+        >
+          <button class="text-text-primary px-4 py-1"> Summarize </button>
+          <button class="text-text-primary px-4 py-1 bg-surface-2 rounded-full">
+            Chapters
+          </button>
+        </div>
+        <div class="prose-sm sm:prose-base">{@html summary}</div>
       </div>
     {/if}
   </div>
