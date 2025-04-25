@@ -131,7 +131,7 @@ button {
 
   100% {
     transform: scale(0.9) translateY(-100px); /* Thu nhỏ còn 80% */
-    opacity: 0.2;
+    opacity: 0;
   }
 }
 
