@@ -60,7 +60,7 @@
 </script>
 
 <div
-  class="settingbar relative rounded-lg bg-surface-1/50 border border-border/25 border-t-border/70"
+  class="settingbar relative rounded-lg bg-surface-2/100 dark:bg-surface-1/50 border border-border dark:border-border/25 dark:border-t-border/100"
 >
   <div class="flex text-muted">
     <div class="flex p-0.5 gap-0.5 border-r border-border/50">

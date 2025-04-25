@@ -13,6 +13,10 @@
   let isLoading = $state(false)
   let error = $state('')
 
+  // Thêm các biến cho theme
+  let systemThemeMediaQuery
+  let systemThemeListener
+
   // --- Main Handler ---
   async function handleSummarizeText() {
     error = ''
@@ -188,33 +192,68 @@
   }
   const [initialize, instance] = useOverlayScrollbars({ options, defer: true })
 
+  function updateTheme(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+      document.documentElement.style.colorScheme = 'dark'
+    } else {
+      document.documentElement.classList.remove('dark')
+      document.documentElement.style.colorScheme = 'light'
+    }
+  }
+
+  function setupSystemThemeListener() {
+    // Đảm bảo listener không bị thêm nhiều lần
+    if (systemThemeMediaQuery) {
+      systemThemeMediaQuery.removeEventListener('change', systemThemeListener)
+    }
+
+    systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    // Listener mới: chỉ áp dụng theme hệ thống nếu không có lựa chọn cụ thể trong localStorage
+    systemThemeListener = (e) => {
+      const currentStoredTheme = localStorage.getItem('theme')
+      // Chỉ áp dụng thay đổi theme hệ thống nếu người dùng không chọn light/dark cụ thể
+      if (!currentStoredTheme) {
+        // Không có 'theme' trong localStorage nghĩa là 'system' đang hoạt động
+        updateTheme(e.matches) // updateTheme thêm/xóa class 'dark'
+      }
+    }
+
+    // Đăng ký listener
+    systemThemeMediaQuery.addEventListener('change', systemThemeListener)
+
+    // Kiểm tra và áp dụng theme ban đầu khi thiết lập listener
+    const currentStoredTheme = localStorage.getItem('theme')
+    if (!currentStoredTheme) {
+      // Không có lựa chọn -> dùng theme hệ thống
+      updateTheme(systemThemeMediaQuery.matches)
+    } else if (currentStoredTheme === 'dark') {
+      // Lựa chọn là dark
+      updateTheme(true)
+    } else {
+      // Lựa chọn là light
+      updateTheme(false)
+    }
+  }
+
   onMount(() => {
     // Initialize OverlayScrollbars on the body element
     initialize(document.body)
-    try {
-      if (
-        localStorage.theme === 'dark' ||
-        (!('theme' in localStorage) &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches)
-      ) {
-        document.documentElement.classList.add('dark')
-        console.log('Applied dark theme.')
-      } else {
-        document.documentElement.classList.remove('dark')
-        console.log('Applied light theme.')
-      }
-    } catch (error) {
-      console.error('Error applying theme:', error)
-    }
+    setupSystemThemeListener() // Gọi hàm thiết lập listener (hàm này giờ cũng áp dụng theme ban đầu)
   })
 
   onDestroy(() => {
     // Destroy the instance when the component is unmounted
     instance()?.destroy()
+    // Dọn dẹp listener
+    if (systemThemeMediaQuery && systemThemeListener) {
+      systemThemeMediaQuery.removeEventListener('change', systemThemeListener)
+    }
   })
 </script>
 
-<div class="bg-background xs:px-8 xs:pb-32 pt-40">
+<div class="bg-background min-h-screen xs:px-8 xs:pb-32 pt-40">
   <!-- Main Content -->
   <div class="max-w-2xl mx-auto flex flex-col">
     <div
@@ -282,54 +321,11 @@
     <!-- Summary Result -->
     {#if summary}
       <div
-        class="p-4 xs:p-8 pb-24 relative z-20 prose dark:prose-invert w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
+        class="p-4 xs:p-8 pb-24 relative z-20 prose w-full max-w-2xl bg-surface-1 border border-border/25 border-t-white dark:border-t-neutral-600 xs:shadow-lg xs:rounded-xl"
       >
         {@html summary}
       </div>
     {/if}
-    <div
-      class="p-4 xs:p-8 pb-24 relative z-20 dark:prose-invert prose w-full max-w-2xl bg-surface-1 border border-border/25 border-t-border xs:shadow-lg xs:rounded-xl"
-    >
-      <h3>Tóm tắt Trang Chủ Radix (phiên bản dài)</h3>
-      <h4>Giới thiệu Radix</h4>
-      <p>
-        Radix là một hệ thống thiết kế được tạo bởi WorkOS, cung cấp các thành
-        phần giao diện người dùng (UI) sẵn sàng sử dụng. Trang chủ giới thiệu
-        các yếu tố chính bao gồm: Themes (chủ đề), Primitives (nguyên tố cơ
-        bản), Icons (biểu tượng), Colors (màu sắc), và Documentation (tài liệu).
-        Người dùng có thể tạo bảng màu tùy chỉnh.
-      </p>
-      <h4>Thành phần thiết kế</h4>
-      <p>
-        Radix cung cấp một bộ sưu tập các thành phần giao diện người dùng, bao
-        gồm: Box, Grid, Image, và Text. Các thành phần này được mô tả là "đầy đủ
-        tính năng" và được xây dựng với Radix, mã nguồn mở.
-      </p>
-      <h4>Hệ thống màu sắc</h4>
-      <p>
-        Hệ thống màu sắc của Radix bao gồm các bảng màu Light (sáng), Dark
-        (tối), Accent (nhấn), Gray (xám), và Background (nền). Người dùng có thể
-        tùy chỉnh bảng màu với các lựa chọn màu sắc chi tiết, ví dụ như 12 sắc
-        thái của màu cam (orange) và xám (gray).
-      </p>
-      <h4>Tài liệu và Hỗ trợ</h4>
-      <p>
-        Trang chủ cung cấp liên kết đến tài liệu hướng dẫn sử dụng. Ngoài ra, có
-        một phần blog và một biểu mẫu đăng ký tài khoản.
-      </p>
-      <h4>Ví dụ về sử dụng</h4>
-      <p>
-        Trang chủ minh họa việc sử dụng Radix thông qua các ví dụ về việc tạo
-        các thành phần giao diện người dùng.
-      </p>
-      <h4>Thông tin khác</h4>
-      <p>
-        Trang chủ cũng hiển thị thông tin liên hệ, một số tác vụ cần thực hiện
-        (ví dụ: trả lời bình luận, mời nhóm vào Slack, tạo báo cáo), và một
-        trích dẫn ngắn về Susan Kare, một nhà thiết kế đồ họa nổi tiếng. Có một
-        lời nhắc nhở nâng cấp lên phiên bản mới.
-      </p>
-    </div>
   </div>
   <div
     class=" fixed bg-linear-to-t from-background to-background/40 bottom-0 mask-t-from-50% h-16 backdrop-blur-[2px] w-full z-30"

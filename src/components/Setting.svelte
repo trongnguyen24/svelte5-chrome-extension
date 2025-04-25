@@ -9,8 +9,43 @@
   let summaryFormat = $state('heading') // Changed default to 'heading' to match options
   let saveStatus = $state('')
   let apiKeyDebounceTimer = null // Timer for debouncing API key save
+  let selectedTheme = $state('system') // State cho theme
+
+  // Hàm cập nhật theme
+  function setTheme(theme) {
+    selectedTheme = theme // Cập nhật state
+
+    if (theme === 'system') {
+      localStorage.removeItem('theme') // Xóa khỏi localStorage nếu là system
+      // Áp dụng theme hệ thống
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark')
+        document.documentElement.style.colorScheme = 'dark'
+      } else {
+        document.documentElement.classList.remove('dark')
+        document.documentElement.style.colorScheme = 'light'
+      }
+    } else {
+      localStorage.setItem('theme', theme) // Lưu vào localStorage
+      // Áp dụng theme light/dark
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark')
+        document.documentElement.style.colorScheme = 'dark'
+      } else {
+        document.documentElement.classList.remove('dark')
+        document.documentElement.style.colorScheme = 'light'
+      }
+    }
+    console.log(`Theme set to: ${theme}`)
+  }
 
   onMount(() => {
+    // Đọc theme từ localStorage khi component mount
+    const storedTheme = localStorage.getItem('theme')
+    // Nếu có giá trị hợp lệ ('light' hoặc 'dark'), dùng nó. Nếu không, mặc định là 'system'.
+    selectedTheme =
+      storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'system'
+
     if (
       typeof chrome !== 'undefined' &&
       chrome.storage &&
@@ -107,19 +142,20 @@
 
 <!-- Apply Tailwind classes for overall layout and styling -->
 <div
-  class="font-mono text-xs bg-background backdrop-blur-3xl overflow-hidden border border-border/50 rounded-2xl w-full flex-shrink-0 flex flex-col"
+  class="font-mono text-text-primary dark:text-muted text-xs bg-surface-2 dark:bg-background backdrop-blur-3xl overflow-hidden border border-border/50 rounded-2xl w-full flex-shrink-0 flex flex-col"
 >
   <div
-    class="px-4 bg-background backdrop-blur-3xl py-2 flex border-t border-border rounded-t-2xl items-center justify-between border-b border-b-border/50"
+    class="px-4 bg-surface-1 dark:bg-background backdrop-blur-3xl py-2 flex border-t border-border rounded-t-2xl items-center justify-between border-b border-b-border/50"
   >
-    <h2 class="  text-text-primary">Settings</h2>
+    <h2 class="  ">Settings</h2>
   </div>
 
   <!-- API Key Section -->
   <div class="p-4 flex flex-col gap-6">
     <div class="flex flex-col gap-2">
       <div class="flex items-center gap-1 justify-between">
-        <label for="api-key" class="block text-muted">Gemini API Key</label>
+        <label for="api-key" class="block dark:text-muted">Gemini API Key</label
+        >
         {#if saveStatus}
           <p id="save-status" transition:fade class="text-success mr-auto">
             <!-- {saveStatus} -->
@@ -172,7 +208,7 @@
     <!-- Summary Length Section -->
     <div class="flex flex-col gap-1">
       <!-- svelte-ignore a11y_label_has_associated_control -->
-      <label class="block text-muted">Summary Length</label>
+      <label class="block">Summary Length</label>
       <div class="flex gap-2 w-fit">
         <button
           onclick={() => updateSetting('summaryLength', 'short')}
@@ -205,7 +241,7 @@
 
     <div class="flex flex-col gap-2">
       <!-- svelte-ignore a11y_label_has_associated_control -->
-      <label class="block text-muted">Summary Format</label>
+      <label class="block">Summary Format</label>
       <div class="flex gap-1">
         <button
           onclick={() => updateSetting('summaryFormat', 'heading')}
@@ -233,7 +269,7 @@
     <!-- Summary Language Section -->
     <div class="flex flex-col gap-2">
       <!-- svelte-ignore a11y_label_has_associated_control -->
-      <label class="block text-muted">Language output</label>
+      <label class="block">Language output</label>
       <div class="flex p-0.5 gap-1">
         <button
           onclick={() => updateSetting('summaryLang', 'vi')}
@@ -254,12 +290,29 @@
     </div>
     <div class="flex flex-col gap-2">
       <!-- svelte-ignore a11y_label_has_associated_control -->
-      <label class="block text-muted">Theme</label>
+      <label class="block">Theme</label>
       <div class="flex p-0.5 gap-1">
-        <button class="setting-lang-btn" title="Light"> Light </button>
-        <button class="setting-lang-btn" title="Dark"> Dark </button>
-        <button class="setting-lang-btn active" title="System"> System </button>
-        <!-- Thêm nút cho ngôn ngữ khác nếu cần -->
+        <button
+          onclick={() => setTheme('light')}
+          class="setting-lang-btn {selectedTheme === 'light' ? 'active' : ''}"
+          title="Light"
+        >
+          Light
+        </button>
+        <button
+          onclick={() => setTheme('dark')}
+          class="setting-lang-btn {selectedTheme === 'dark' ? 'active' : ''}"
+          title="Dark"
+        >
+          Dark
+        </button>
+        <button
+          onclick={() => setTheme('system')}
+          class="setting-lang-btn {selectedTheme === 'system' ? 'active' : ''}"
+          title="System"
+        >
+          System
+        </button>
       </div>
     </div>
   </div>

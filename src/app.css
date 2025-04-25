@@ -1,13 +1,10 @@
 @import 'tailwindcss';
 @import 'tailwindcss-animated';
 @plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --breakpoint-xs: 38rem;
-
-  /* Color scheme */
-  --color-scheme: light;
-
   --color-background: oklch(93.1% 0.0061 277.7);
   --color-surface-1: oklch(95.6% 0.0045 277.7);
   --color-surface-2: oklch(99.1% 0.0015 277.7);
@@ -19,9 +16,26 @@
   --color-success: oklch(0.768 0.233 130.85);
   --color-error: oklch(0.637 0.237 25.331);
 }
-.dark {
-  /* Color scheme */
-  --color-scheme: dark;
+.dark,
+.dark .prose {
+  --tw-prose-body: var(--tw-prose-invert-body);
+  --tw-prose-headings: var(--tw-prose-invert-headings);
+  --tw-prose-lead: var(--tw-prose-invert-lead);
+  --tw-prose-links: var(--tw-prose-invert-links);
+  --tw-prose-bold: var(--tw-prose-invert-bold);
+  --tw-prose-counters: var(--tw-prose-invert-counters);
+  --tw-prose-bullets: var(--tw-prose-invert-bullets);
+  --tw-prose-hr: var(--tw-prose-invert-hr);
+  --tw-prose-quotes: var(--tw-prose-invert-quotes);
+  --tw-prose-quote-borders: var(--tw-prose-invert-quote-borders);
+  --tw-prose-captions: var(--tw-prose-invert-captions);
+  --tw-prose-kbd: var(--tw-prose-invert-kbd);
+  --tw-prose-kbd-shadows: var(--tw-prose-invert-kbd-shadows);
+  --tw-prose-code: var(--tw-prose-invert-code);
+  --tw-prose-pre-code: var(--tw-prose-invert-pre-code);
+  --tw-prose-pre-bg: var(--tw-prose-invert-pre-bg);
+  --tw-prose-th-borders: var(--tw-prose-invert-th-borders);
+  --tw-prose-td-borders: var(--tw-prose-invert-td-borders);
 
   --color-background: oklch(0.23 0.0041 264.49); /* Gray 1 */
   --color-surface-1: oklch(29.9% 0.0044 271.2); /* Gray 3 */
@@ -46,12 +60,9 @@ button {
 }
 
 .settingbar button {
-  @apply p-1 hover:bg-surface-2 rounded-md  transition-colors duration-150;
+  @apply p-1 dark:hover:bg-surface-2 hover:bg-surface-1 rounded-md  transition-colors duration-150;
 }
 
-.settingbar button:hover {
-  @apply bg-surface-2;
-}
 .settingbar button.active {
   @apply text-text-primary;
 }
@@ -62,49 +73,39 @@ button {
 /* } */
 
 .setting-length-btn {
-  @apply p-1 text-xs flex flex-col items-center gap-2 text-muted  w-16 transition-colors duration-150;
+  @apply px-3 py-0.5  hover:bg-surface-1 hover:text-text-primary items-center gap-2 w-16 rounded-full transition-colors duration-150;
 }
 
-.setting-length-btn span {
-  @apply px-3 block py-0.5 text-text-secondary rounded-full transition-colors duration-150;
-}
 .setting-length-btn.active {
-  @apply text-text-primary;
-}
-
-.setting-length-btn.active span {
-  @apply text-text-primary bg-surface-2;
+  @apply text-text-primary bg-background dark:bg-surface-2;
 }
 
 .setting-lang-btn {
-  @apply px-3 py-0.5 text-text-secondary rounded-full transition-colors duration-150;
+  @apply px-3 py-0.5 hover:bg-surface-1 hover:text-text-primary  rounded-full transition-colors duration-150;
 }
 
 .setting-lang-btn.active {
-  @apply text-text-primary bg-surface-2;
+  @apply text-text-primary bg-background dark:bg-surface-2;
 }
 
 .setting-format-btn {
-  @apply p-1 text-xs flex flex-col items-center gap-2 text-muted   transition-colors duration-150;
+  @apply px-3 py-0.5 hover:bg-surface-1 hover:text-text-primary  rounded-full transition-colors duration-150;
 }
 
-.setting-format-btn span {
-  @apply px-3 block py-0.5 text-text-secondary rounded-full transition-colors duration-150;
-}
 .setting-format-btn.active {
-  @apply text-text-primary;
+  @apply text-text-primary bg-background dark:bg-surface-2;
 }
 
 .setting-format-btn.active span {
-  @apply text-text-primary bg-surface-2;
+  @apply text-text-primary bg-background dark:bg-surface-2;
 }
 
 .setting-theme-btn {
-  @apply px-3 py-0.5 text-text-secondary rounded-full transition-colors duration-150;
+  @apply px-3 py-0.5 hover:bg-surface-1 hover:text-text-primary text-text-secondary rounded-full transition-colors duration-150;
 }
 
 .setting-theme-btn.active {
-  @apply text-text-primary bg-surface-2;
+  @apply text-text-primary bg-background dark:bg-surface-2;
 }
 .animate-spin-slow {
   animation: spin 6s cubic-bezier(0.1, 0.5, 0.9, 0.5) infinite;
@@ -119,7 +120,7 @@ button {
   animation-duration: auto;
   animation-fill-mode: both;
   animation-timeline: scroll();
-  animation-range: 0 300;
+  animation-range: 0 300px;
 }
 
 @keyframes shrink-and-fade {
