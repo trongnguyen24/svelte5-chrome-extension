@@ -23,21 +23,23 @@
     <div class="flex p-0.5 gap-0.5 border-r border-border/50">
       <button
         onclick={() => updateSettings({ summaryLength: 'short' })}
-        class:active={settings.summaryLength === 'short'}
+        class={settingsStore.settings.summaryLength === 'short' ? 'active' : ''}
         title="Short summary"
       >
         <Icon width={16} icon="heroicons:minus-16-solid" />
       </button>
       <button
         onclick={() => updateSettings({ summaryLength: 'medium' })}
-        class:active={settings.summaryLength === 'medium'}
+        class={settingsStore.settings.summaryLength === 'medium'
+          ? 'active'
+          : ''}
         title="Medium summary"
       >
         <Icon width={16} icon="heroicons:bars-2-16-solid" />
       </button>
       <button
         onclick={() => updateSettings({ summaryLength: 'long' })}
-        class:active={settings.summaryLength === 'long'}
+        class={settingsStore.settings.summaryLength === 'long' ? 'active' : ''}
         title="Long summary"
       >
         <Icon width={16} icon="heroicons:bars-3-16-solid" />
@@ -46,14 +48,18 @@
     <div class="flex p-0.5 gap-0.5 border-r border-border/50">
       <button
         onclick={() => updateSettings({ summaryFormat: 'heading' })}
-        class:active={settings.summaryFormat === 'heading'}
+        class={settingsStore.settings.summaryFormat === 'heading'
+          ? 'active'
+          : ''}
         title="Heading format"
       >
         <Icon width={16} icon="heroicons:list-bullet-16-solid" />
       </button>
       <button
         onclick={() => updateSettings({ summaryFormat: 'paragraph' })}
-        class:active={settings.summaryFormat === 'paragraph'}
+        class={settingsStore.settings.summaryFormat === 'paragraph'
+          ? 'active'
+          : ''}
         title="Paragraph format"
       >
         <Icon width={16} icon="heroicons:bars-4-16-solid" />
