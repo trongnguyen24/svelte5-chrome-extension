@@ -1,34 +1,31 @@
-import { getSummaryOptions, buildPrompt, buildChapterPrompt } from './utils.js' // Import các hàm tĩnh cần thiết
+// @svelte-compiler-ignore
+import { buildPrompt, buildChapterPrompt } from './utils.js' // Import các hàm tĩnh cần thiết
 
-export async function getApiKey() {
-  return new Promise((resolve) => {
-    // Check if running in a Chrome extension context
-    if (
-      typeof chrome !== 'undefined' &&
-      chrome.storage &&
-      chrome.storage.sync
-    ) {
-      chrome.storage.sync.get(['geminiApiKey'], (result) => {
-        resolve(result.geminiApiKey || '')
-      })
-    } else {
-      // Provide a default or handle the case where chrome.storage is not available
-      console.warn(
-        'chrome.storage.sync not available. Returning empty API key.'
-      )
-      resolve('') // Or perhaps load from localStorage or another source?
-    }
-  })
-}
-
-export async function summarizeWithGemini(text, apiKey, isYouTube = false) {
+/**
+ * Tóm tắt nội dung sử dụng Google Gemini.
+ * @param {string} text - Nội dung cần tóm tắt (transcript hoặc text trang web).
+ * @param {string} apiKey - Google AI API Key.
+ * @param {boolean} isYouTube - True nếu nội dung là từ YouTube.
+ * @param {string} lang - Ngôn ngữ mong muốn cho tóm tắt.
+ * @param {string} length - Độ dài mong muốn cho tóm tắt ('short', 'medium', 'long').
+ * @param {string} format - Định dạng mong muốn cho tóm tắt ('heading', 'paragraph').
+ * @returns {Promise<string>} - Promise giải quyết với bản tóm tắt dưới dạng Markdown.
+ */
+export async function summarizeWithGemini(
+  text,
+  apiKey,
+  isYouTube,
+  lang,
+  length,
+  format
+) {
   if (!apiKey) {
     throw new Error(
       'Gemini API key is not configured. Click the settings icon on the right to add your API key.'
     )
   }
-  const options = await getSummaryOptions() // Sử dụng hàm đã import tĩnh
-  const prompt = buildPrompt(text, options, isYouTube) // Truyền isYouTube
+
+  const prompt = buildPrompt(text, lang, length, format, isYouTube) // Sử dụng hàm buildPrompt đã cập nhật
   const model = 'gemini-1.5-flash' // Use a recommended model
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=` +
@@ -76,14 +73,14 @@ export async function summarizeWithGemini(text, apiKey, isYouTube = false) {
  * Tóm tắt nội dung video YouTube theo chapter sử dụng Google Gemini.
  * @param {string} timestampedTranscript - Transcript của video có kèm timestamp.
  * @param {string} apiKey - Google AI API Key.
- * @param {string} language - Ngôn ngữ mong muốn cho tóm tắt chapter.
+ * @param {string} lang - Ngôn ngữ mong muốn cho tóm tắt chapter.
  * @param {string} length - Độ dài mong muốn cho tóm tắt chapter ('short', 'medium', 'long').
  * @returns {Promise<string>} - Promise giải quyết với bản tóm tắt theo chapter dưới dạng Markdown.
  */
 export async function summarizeChaptersWithGemini(
   timestampedTranscript,
   apiKey,
-  language,
+  lang,
   length
 ) {
   if (!apiKey) {
@@ -92,13 +89,7 @@ export async function summarizeChaptersWithGemini(
     )
   }
 
-  const options = await getSummaryOptions() // Lấy options
-  const prompt = buildChapterPrompt(
-    timestampedTranscript,
-    options,
-    language,
-    length
-  ) // Sử dụng hàm mới
+  const prompt = buildChapterPrompt(timestampedTranscript, lang, length) // Sử dụng hàm buildChapterPrompt đã cập nhật
 
   const model = 'gemini-1.5-flash' // Cập nhật model nếu cần, ví dụ gemini-1.5-flash
   const url =

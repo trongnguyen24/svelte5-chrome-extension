@@ -1,30 +1,10 @@
-export async function getSummaryOptions() {
-  return new Promise((resolve) => {
-    if (
-      typeof chrome !== 'undefined' &&
-      chrome.storage &&
-      chrome.storage.sync
-    ) {
-      chrome.storage.sync.get(
-        ['summaryLength', 'summaryLang', 'summaryFormat'],
-        (result) => {
-          resolve({
-            length: result.summaryLength || 'medium',
-            lang: result.summaryLang || 'vi',
-            format: result.summaryFormat || 'heading',
-          })
-        }
-      )
-    } else {
-      console.warn(
-        'chrome.storage.sync not available. Returning default options.'
-      )
-      resolve({ length: 'medium', lang: 'vi', format: 'heading' })
-    }
-  })
-}
-
-export function buildPrompt(text, options, isYouTube = false) {
+export function buildPrompt(
+  text,
+  lang = 'vi',
+  length = 'medium',
+  format = 'heading',
+  isYouTube = false
+) {
   let promptTemplate = ''
 
   if (isYouTube) {
@@ -32,15 +12,15 @@ export function buildPrompt(text, options, isYouTube = false) {
 
 Khi tôi cung cấp transcript từ một video YouTube, hãy phân tích và tóm tắt theo các tham số sau:
 
-1. Độ dài tóm tắt: ${options.length}
+1. Độ dài tóm tắt: ${length}
    - "short": 2-3 câu về ý chính
    - "medium": Nhiều đoạn bao gồm các điểm chính
    - "long": Tóm tắt chi tiết bao gồm tất cả các phần quan trọng
 
-2. Ngôn ngữ: ${options.lang}
+2. Ngôn ngữ: ${lang}
    - Tóm tắt sẽ được trả về bằng ngôn ngữ được chỉ định (ví dụ: "vi" cho tiếng Việt, "en" cho tiếng Anh)
 
-3. Định dạng: ${options.format}
+3. Định dạng: ${format}
    - "paragraph": Tóm tắt dưới dạng văn bản liền mạch
    - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
 
@@ -70,15 +50,15 @@ ${text}`
 
 Khi nhận được nội dung, hãy phân tích và tóm tắt nội dung chính dựa trên các tham số sau:
 
-1. Độ dài tóm tắt: ${options.length}
+1. Độ dài tóm tắt: ${length}
    - "short": 2-3 câu về ý chính
    - "medium": Nhiều đoạn bao gồm các điểm chính
    - "long": Tóm tắt chi tiết bao gồm tất cả các phần quan trọng
 
-2. Ngôn ngữ: ${options.lang}
+2. Ngôn ngữ: ${lang}
    - Tóm tắt sẽ được trả về bằng ngôn ngữ được chỉ định (ví dụ: "vi" cho tiếng Việt, "en" cho tiếng Anh)
 
-3. Định dạng: ${options.format}
+3. Định dạng: ${format}
    - "paragraph": Tóm tắt dưới dạng văn bản liền mạch
    - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
 
@@ -101,25 +81,24 @@ Lưu ý: Nếu bạn không thể tóm tắt vì bất kỳ lý do gì (ví dụ
 
 export function buildChapterPrompt(
   timestampedTranscript,
-  options,
-  language,
-  length
+  lang = 'vi',
+  length = 'medium'
 ) {
   const prompt = `
 Bạn là một AI chuyên gia trong việc tóm tắt nội dung video YouTube. Nhiệm vụ của bạn là tạo ra bản tóm tắt chi tiết theo từng chapter của video, kèm theo thời gian bắt đầu của mỗi phần, dựa trên transcript có sẵn thời gian.
 
 Khi tôi cung cấp transcript có thời gian của một video YouTube, hãy tạo tóm tắt theo hướng dẫn sau:
 
-1.  **Ngôn ngữ tóm tắt:** Hãy tạo tóm tắt bằng ngôn ngữ: ${language}.
+1.  **Ngôn ngữ tóm tắt:** Hãy tạo tóm tắt bằng ngôn ngữ: ${lang}.
 2.  **Độ dài tóm tắt cho mỗi chapter:** Mục tiêu độ dài là: ${length} ('short': 1-2 câu, 'medium': 2-4 câu, 'long': chi tiết hơn nếu cần).
-3.  **Phân tích transcript:** Tự động xác định các phần (chapters) logic dựa trên sự thay đổi chủ đề hoặc khoảng dừng trong transcript. Đặt tên phù hợp cho mỗi chapter (theo ngôn ngữ ${language}).
-4.  **Tạo tiêu đề chính:** Bắt đầu với "### Tóm tắt video theo chương:" (hoặc tương đương trong ngôn ngữ ${language}).
+3.  **Phân tích transcript:** Tự động xác định các phần (chapters) logic dựa trên sự thay đổi chủ đề hoặc khoảng dừng trong transcript. Đặt tên phù hợp cho mỗi chapter (theo ngôn ngữ ${lang}).
+4.  **Tạo tiêu đề chính:** Bắt đầu với "### Tóm tắt video theo chương:" (hoặc tương đương trong ngôn ngữ ${lang}).
 5.  **Với mỗi chapter bạn xác định được:**
     *   Tạo tiêu đề cấp 4 (####) với định dạng: "#### [Thời gian bắt đầu Ước lượng] - [Tên chapter bạn đặt]"
-        Ví dụ: "#### 0:15 - Introduction to Svelte 5" (hoặc tương đương trong ngôn ngữ ${language})
+        Ví dụ: "#### 0:15 - Introduction to Svelte 5" (hoặc tương đương trong ngôn ngữ ${lang})
     *   Dưới mỗi tiêu đề chapter, tóm tắt nội dung chính của chapter đó theo độ dài ${length} yêu cầu, dựa vào transcript.
     *   Nếu chapter có các điểm quan trọng cần nhấn mạnh, hãy sử dụng tiêu đề cấp 5 (#####) và bullet points cho các điểm này.
-        Ví dụ: "##### What are Runes?" (hoặc tương đương trong ngôn ngữ ${language}) và sau đó giải thích điểm đó.
+        Ví dụ: "##### What are Runes?" (hoặc tương đương trong ngôn ngữ ${lang}) và sau đó giải thích điểm đó.
 6.  **Đảm bảo bao gồm:**
     *   Các luận điểm chính.
     *   Thuật ngữ quan trọng được giải thích (nếu có trong transcript).
@@ -128,14 +107,14 @@ Khi tôi cung cấp transcript có thời gian của một video YouTube, hãy t
     *   #### cho tiêu đề chapter với thời gian.
     *   ##### cho các điểm quan trọng trong chapter.
     *   **In đậm** cho thuật ngữ/khái niệm quan trọng.
-8.  **Kết thúc:** Bằng phần "### Kết luận chung" (hoặc tương đương trong ngôn ngữ ${language}) tóm tắt thông điệp tổng thể.
+8.  **Kết thúc:** Bằng phần "### Kết luận chung" (hoặc tương đương trong ngôn ngữ ${lang}) tóm tắt thông điệp tổng thể.
 
 Transcript có thời gian:
 \`\`\`
 ${timestampedTranscript}
 \`\`\`
 
-Hãy tạo bản tóm tắt theo chương bằng ngôn ngữ ${language} và độ dài ${length} từ transcript trên.
+Hãy tạo bản tóm tắt theo chương bằng ngôn ngữ ${lang} và độ dài ${length} từ transcript trên.
 `
   return prompt
 }

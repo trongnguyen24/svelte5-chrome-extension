@@ -28,6 +28,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   // Check if it's a YouTube video page
   if (tab.url.match(YOUTUBE_MATCH_PATTERN)) {
     console.log('Action clicked on YouTube page, attempting injection...')
+    // Inject script only if it's a YouTube page
     await injectContentScript(tab.id)
   }
 

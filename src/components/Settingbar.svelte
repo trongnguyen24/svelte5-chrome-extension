@@ -1,62 +1,19 @@
 <script>
   import Icon from '@iconify/svelte'
-  import Setting from './Setting.svelte'
+  import Setting from './Setting.svelte' // Assuming Setting.svelte will also be refactored
   import { Dialog } from 'bits-ui'
-  import { fade, fly } from 'svelte/transition'
-  import { slideScaleFade } from '../lib/slideScaleFade'
+  import { fade } from 'svelte/transition'
+  import { slideScaleFade } from '../lib/slideScaleFade.js' // Corrected path if needed
   import '../app.css'
-  import { onMount } from 'svelte'
+  import { settingsStore } from '../stores/settingsStore.svelte.js' // Import the settingsStore object
 
-  let currentLength = $state('')
-  let currentFormat = $state('')
-  let isOpen = $state(false)
+  let isOpen = $state(false) // State for the dialog
 
-  onMount(() => {
-    if (
-      typeof chrome !== 'undefined' &&
-      chrome.storage &&
-      chrome.storage.sync
-    ) {
-      chrome.storage.sync.get(['summaryLength', 'summaryFormat'], (result) => {
-        if (result.summaryLength) currentLength = result.summaryLength
-        if (result.summaryFormat) currentFormat = result.summaryFormat
-      })
+  // Access state and action via the imported object
+  const { settings, updateSettings } = settingsStore
 
-      // Lắng nghe sự thay đổi từ storage để cập nhật UI nếu cần
-      chrome.storage.onChanged.addListener((changes, namespace) => {
-        if (namespace === 'sync') {
-          if (changes.summaryLength) {
-            currentLength = changes.summaryLength.newValue
-          }
-          if (changes.summaryFormat) {
-            currentFormat = changes.summaryFormat.newValue
-          }
-        }
-      })
-    } else {
-      console.warn('Chrome storage API không khả dụng.')
-      // Có thể set giá trị mặc định ở đây nếu cần cho môi trường dev
-      currentLength = 'medium'
-      currentFormat = 'heading'
-    }
-  })
-
-  function updateSetting(key, value) {
-    if (
-      typeof chrome !== 'undefined' &&
-      chrome.storage &&
-      chrome.storage.sync
-    ) {
-      chrome.storage.sync.set({ [key]: value }, () => {
-        // console.log(`Đã cập nhật ${key} thành ${value}`);
-        // State sẽ tự cập nhật nhờ listener ở onMount
-      })
-    } else {
-      console.warn('Chrome storage API không khả dụng. Mô phỏng cập nhật.')
-      if (key === 'summaryLength') currentLength = value
-      if (key === 'summaryFormat') currentFormat = value
-    }
-  }
+  // No need for onMount or updateSetting function anymore
+  // State (currentLength, currentFormat) is now directly from the 'settings' store ($state)
 </script>
 
 <div
@@ -65,22 +22,22 @@
   <div class="flex text-muted">
     <div class="flex p-0.5 gap-0.5 border-r border-border/50">
       <button
-        onclick={() => updateSetting('summaryLength', 'short')}
-        class:active={currentLength === 'short'}
+        onclick={() => updateSettings({ summaryLength: 'short' })}
+        class:active={settings.summaryLength === 'short'}
         title="Short summary"
       >
         <Icon width={16} icon="heroicons:minus-16-solid" />
       </button>
       <button
-        onclick={() => updateSetting('summaryLength', 'medium')}
-        class:active={currentLength === 'medium'}
+        onclick={() => updateSettings({ summaryLength: 'medium' })}
+        class:active={settings.summaryLength === 'medium'}
         title="Medium summary"
       >
         <Icon width={16} icon="heroicons:bars-2-16-solid" />
       </button>
       <button
-        onclick={() => updateSetting('summaryLength', 'long')}
-        class:active={currentLength === 'long'}
+        onclick={() => updateSettings({ summaryLength: 'long' })}
+        class:active={settings.summaryLength === 'long'}
         title="Long summary"
       >
         <Icon width={16} icon="heroicons:bars-3-16-solid" />
@@ -88,15 +45,15 @@
     </div>
     <div class="flex p-0.5 gap-0.5 border-r border-border/50">
       <button
-        onclick={() => updateSetting('summaryFormat', 'heading')}
-        class:active={currentFormat === 'heading'}
+        onclick={() => updateSettings({ summaryFormat: 'heading' })}
+        class:active={settings.summaryFormat === 'heading'}
         title="Heading format"
       >
         <Icon width={16} icon="heroicons:list-bullet-16-solid" />
       </button>
       <button
-        onclick={() => updateSetting('summaryFormat', 'paragraph')}
-        class:active={currentFormat === 'paragraph'}
+        onclick={() => updateSettings({ summaryFormat: 'paragraph' })}
+        class:active={settings.summaryFormat === 'paragraph'}
         title="Paragraph format"
       >
         <Icon width={16} icon="heroicons:bars-4-16-solid" />
