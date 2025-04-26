@@ -1,4 +1,4 @@
-import { getSummaryOptions, buildPrompt } from './utils.js' // Import cả hai hàm tĩnh
+import { getSummaryOptions, buildPrompt, buildChapterPrompt } from './utils.js' // Import các hàm tĩnh cần thiết
 
 export async function getApiKey() {
   return new Promise((resolve) => {
@@ -76,11 +76,15 @@ export async function summarizeWithGemini(text, apiKey, isYouTube = false) {
  * Tóm tắt nội dung video YouTube theo chapter sử dụng Google Gemini.
  * @param {string} timestampedTranscript - Transcript của video có kèm timestamp.
  * @param {string} apiKey - Google AI API Key.
+ * @param {string} language - Ngôn ngữ mong muốn cho tóm tắt chapter.
+ * @param {string} length - Độ dài mong muốn cho tóm tắt chapter ('short', 'medium', 'long').
  * @returns {Promise<string>} - Promise giải quyết với bản tóm tắt theo chapter dưới dạng Markdown.
  */
 export async function summarizeChaptersWithGemini(
   timestampedTranscript,
-  apiKey
+  apiKey,
+  language,
+  length
 ) {
   if (!apiKey) {
     throw new Error(
@@ -88,38 +92,15 @@ export async function summarizeChaptersWithGemini(
     )
   }
 
-  const prompt = `
-Bạn là một AI chuyên gia trong việc tóm tắt nội dung video YouTube. Nhiệm vụ của bạn là tạo ra bản tóm tắt chi tiết theo từng chapter của video, kèm theo thời gian bắt đầu của mỗi phần, dựa trên transcript có sẵn thời gian.
+  const options = await getSummaryOptions() // Lấy options
+  const prompt = buildChapterPrompt(
+    timestampedTranscript,
+    options,
+    language,
+    length
+  ) // Sử dụng hàm mới
 
-Khi tôi cung cấp transcript có thời gian của một video YouTube, hãy tạo tóm tắt theo hướng dẫn sau:
-
-1.  **Phân tích transcript:** Tự động xác định các phần (chapters) logic dựa trên sự thay đổi chủ đề hoặc khoảng dừng trong transcript. Đặt tên phù hợp cho mỗi chapter.
-2.  **Tạo tiêu đề chính:** Bắt đầu với "### Tóm tắt video theo chương:".
-3.  **Với mỗi chapter bạn xác định được:**
-    *   Tạo tiêu đề cấp 4 (####) với định dạng: "#### [Thời gian bắt đầu Ước lượng] - [Tên chapter bạn đặt]"
-        Ví dụ: "#### 0:15 - Giới thiệu về Svelte 5"
-    *   Dưới mỗi tiêu đề chapter, tóm tắt nội dung chính của chapter đó bằng 2-4 câu, dựa vào transcript.
-    *   Nếu chapter có các điểm quan trọng cần nhấn mạnh, hãy sử dụng tiêu đề cấp 4 (####) và bullet points cho các điểm này.
-        Ví dụ: "#### Runes là gì?" và sau đó giải thích điểm đó.
-4.  **Đảm bảo bao gồm:**
-    *   Các luận điểm chính.
-    *   Thuật ngữ quan trọng được giải thích (nếu có trong transcript).
-    *   Kết luận hoặc ý chính cuối cùng (nếu có). 
-5.  **Sử dụng định dạng markdown:**
-    *   #### cho tiêu đề chapter với thời gian.
-    *   ##### cho các điểm quan trọng trong chapter.
-    *   **In đậm** cho thuật ngữ/khái niệm quan trọng.
-6.  **Kết thúc:** Bằng phần "### Kết luận chung" tóm tắt thông điệp tổng thể.
-
-Transcript có thời gian:
-\`\`\`
-${timestampedTranscript}
-\`\`\`
-
-Hãy tạo bản tóm tắt theo chương từ transcript trên.
-`
-
-  const model = 'gemini-2.0-flash' // Or another suitable model
+  const model = 'gemini-1.5-flash' // Cập nhật model nếu cần, ví dụ gemini-1.5-flash
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=` +
     apiKey

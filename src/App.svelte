@@ -134,9 +134,25 @@
               const apiKey = await getApiKey() // Lấy key lại hoặc dùng key đã lấy trước đó
               if (!apiKey) throw new Error('Chưa cấu hình API Key.')
 
+              // Lấy cài đặt ngôn ngữ và độ dài cho chapters
+              const { lang: chapterLang, length: chapterLength } =
+                await new Promise((resolve) => {
+                  chrome.storage.sync.get(
+                    ['summaryLang', 'summaryLength'],
+                    (result) => {
+                      resolve({
+                        lang: result.summaryLang || 'vi', // Mặc định 'vi' nếu không có
+                        length: result.summaryLength || 'medium', // Mặc định 'medium' nếu không có
+                      })
+                    }
+                  )
+                })
+
               const chapterSummarizedText = await summarizeChaptersWithGemini(
                 timestampedTranscript,
-                apiKey
+                apiKey,
+                chapterLang, // Truyền ngôn ngữ
+                chapterLength // Truyền độ dài
               )
               // Kiểm tra nếu kết quả trả về là chuỗi rỗng hoặc chỉ có khoảng trắng
               if (
@@ -403,7 +419,7 @@
     </div>
 
     <div
-      class="relative z-0 flex flex-col gap-6 pt-4"
+      class="relative z-10 flex flex-col gap-6 pt-4"
       class:mt-[-4rem]={!summary &&
         !error &&
         !chapterSummary &&
