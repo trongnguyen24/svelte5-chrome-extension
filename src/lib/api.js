@@ -32,7 +32,7 @@ export async function summarizeWithGemini(
     apiKey
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 4096 }, // Adjusted temperature slightly
+    generationConfig: { temperature: 0.3, maxOutputTokens: 65536 }, // Adjusted temperature slightly
   }
 
   try {
@@ -98,7 +98,7 @@ export async function summarizeChaptersWithGemini(
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
     // Adjust generationConfig if needed, e.g., for longer/more detailed chapters
-    generationConfig: { temperature: 0.4, maxOutputTokens: 4096 },
+    generationConfig: { temperature: 0.4, maxOutputTokens: 65536 },
   }
 
   try {

@@ -1,19 +1,57 @@
 <script>
+  import { onMount, onDestroy } from 'svelte' // Import onMount and onDestroy
+  import 'overlayscrollbars/overlayscrollbars.css' // Import CSS overlayscrollbars
+  import { useOverlayScrollbars } from 'overlayscrollbars-svelte' // Import primitive
   import Settingbar from './components/Settingbar.svelte'
   import SummarizeButton from './components/SummarizeButton.svelte' // Import new component
   import TabNavigation from './components/TabNavigation.svelte' // Import new component
   import SummaryDisplay from './components/SummaryDisplay.svelte' // Import new component
   import ChapterDisplay from './components/ChapterDisplay.svelte' // Import new component
-
   import { summaryStore } from './stores/summaryStore.svelte.js' // Import the summaryStore object
+  import { theme, setTheme } from './stores/themeStore.svelte' // Import theme store and setTheme function
 
   // State for UI tabs
   let activeTab = $state('summary')
+
+  const options = {
+    scrollbars: {
+      autoHide: 'scroll',
+      theme: 'os-theme-custom-app',
+    },
+  }
+  const [initialize, instance] = useOverlayScrollbars({ options, defer: true })
 
   // Handle tab change event from TabNavigation
   document.addEventListener('summarizeClick', summaryStore.fetchAndSummarize) // Listen for click event from SummarizeButton
   document.addEventListener('tabChange', (event) => {
     activeTab = event.detail
+  })
+
+  // Lắng nghe sự thay đổi theme của hệ thống
+  let mediaQuery
+  let mediaQueryListener
+
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      mediaQueryListener = (e) => {
+        // Chỉ cập nhật nếu theme hiện tại là 'system'
+        if ($theme === 'system') {
+          // Cập nhật store. applyTheme sẽ được gọi qua subscribe trong store.
+          setTheme('system') // Đặt lại là 'system' để kích hoạt subscribe và áp dụng theme hệ thống mới
+        }
+      }
+      mediaQuery.addEventListener('change', mediaQueryListener)
+    }
+
+    // Initialize OverlayScrollbars on the body element
+    initialize(document.body)
+  })
+
+  onDestroy(() => {
+    if (mediaQuery && mediaQueryListener) {
+      mediaQuery.removeEventListener('change', mediaQueryListener)
+    }
   })
 
   // Removed: textToSummarize, local summary/loading/error states, theme logic,

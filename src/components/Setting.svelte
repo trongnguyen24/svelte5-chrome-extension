@@ -2,6 +2,8 @@
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
   import Icon from '@iconify/svelte' // Import Icon
+  import { theme, setTheme } from '../stores/themeStore.svelte' // Import theme store and setTheme function
+
   let apiKey = $state('')
   let showApiKey = $state(false) // Track API key visibility
   let summaryLength = $state('medium')
@@ -9,43 +11,8 @@
   let summaryFormat = $state('heading') // Changed default to 'heading' to match options
   let saveStatus = $state('')
   let apiKeyDebounceTimer = null // Timer for debouncing API key save
-  let selectedTheme = $state('system') // State cho theme
-
-  // Hàm cập nhật theme
-  function setTheme(theme) {
-    selectedTheme = theme // Cập nhật state
-
-    if (theme === 'system') {
-      localStorage.removeItem('theme') // Xóa khỏi localStorage nếu là system
-      // Áp dụng theme hệ thống
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark')
-        document.documentElement.style.colorScheme = 'dark'
-      } else {
-        document.documentElement.classList.remove('dark')
-        document.documentElement.style.colorScheme = 'light'
-      }
-    } else {
-      localStorage.setItem('theme', theme) // Lưu vào localStorage
-      // Áp dụng theme light/dark
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark')
-        document.documentElement.style.colorScheme = 'dark'
-      } else {
-        document.documentElement.classList.remove('dark')
-        document.documentElement.style.colorScheme = 'light'
-      }
-    }
-    console.log(`Theme set to: ${theme}`)
-  }
 
   onMount(() => {
-    // Đọc theme từ localStorage khi component mount
-    const storedTheme = localStorage.getItem('theme')
-    // Nếu có giá trị hợp lệ ('light' hoặc 'dark'), dùng nó. Nếu không, mặc định là 'system'.
-    selectedTheme =
-      storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'system'
-
     if (
       typeof chrome !== 'undefined' &&
       chrome.storage &&
@@ -294,21 +261,21 @@
       <div class="flex p-0.5 gap-1">
         <button
           onclick={() => setTheme('light')}
-          class="setting-lang-btn {selectedTheme === 'light' ? 'active' : ''}"
+          class="setting-lang-btn {$theme === 'light' ? 'active' : ''}"
           title="Light"
         >
           Light
         </button>
         <button
           onclick={() => setTheme('dark')}
-          class="setting-lang-btn {selectedTheme === 'dark' ? 'active' : ''}"
+          class="setting-lang-btn {$theme === 'dark' ? 'active' : ''}"
           title="Dark"
         >
           Dark
         </button>
         <button
           onclick={() => setTheme('system')}
-          class="setting-lang-btn {selectedTheme === 'system' ? 'active' : ''}"
+          class="setting-lang-btn {$theme === 'system' ? 'active' : ''}"
           title="System"
         >
           System
