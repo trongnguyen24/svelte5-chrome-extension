@@ -22,7 +22,7 @@ Khi tôi cung cấp transcript từ một video YouTube, hãy phân tích và t�
 
 3. Định dạng: ${format}
    - "paragraph": Tóm tắt dưới dạng văn bản liền mạch
-   - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
+   - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ## và ###
 
 Hướng dẫn tóm tắt:
 - Không cần chào hỏi hay giới thiệu, chỉ bắt đầu bằng tiêu đề và nội dung tóm tắt
@@ -62,7 +62,7 @@ Khi nhận được nội dung, hãy phân tích và tóm tắt nội dung chín
 
 3. Định dạng: ${format}
    - "paragraph": Tóm tắt dưới dạng văn bản liền mạch
-   - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
+   - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ## và ###
 
 Trong tóm tắt của bạn:
 - Không cần chào hỏi hay giới thiệu, chỉ bắt đầu bằng tiêu đề và nội dung tóm tắt
@@ -96,15 +96,15 @@ Khi tôi cung cấp transcript có thời gian của một video YouTube, hãy t
 1.  **Ngôn ngữ tóm tắt:** Hãy tạo tóm tắt bằng ngôn ngữ: ${lang}.
 2.  **Độ dài tóm tắt cho mỗi chapter:** Mục tiêu độ dài là: ${length} ('short': 1-2 câu, 'medium': 2-4 câu, 'long': chi tiết hơn nếu cần).
 3.  **Phân tích transcript:** Tự động xác định các phần (chapters) logic dựa trên sự thay đổi chủ đề hoặc khoảng dừng trong transcript. Đặt tên phù hợp cho mỗi chapter (theo ngôn ngữ ${lang}).
-4.  **Tạo tiêu đề chính:** Bắt đầu với "### Tóm tắt video theo chương:" (hoặc tương đương trong ngôn ngữ ${lang}).
+4.  **Tạo tiêu đề chính:** Bắt đầu với "## Tóm tắt video theo chương:" (hoặc tương đương trong ngôn ngữ ${lang}).
 5.  **Với mỗi chapter bạn xác định được:**
     *   Bạn chỉ dưa ra kết quả không cần chào hỏi hay giới thiệu.
-    *   Tạo tiêu đề cấp 4 (####) với định dạng: "#### [Thời gian bắt đầu Ước lượng] - [Tên chapter bạn đặt]"
+    *   Tạo tiêu đề cấp 3 (###) với định dạng: "### [Thời gian bắt đầu Ước lượng] - [Tên chapter bạn đặt]"
         Ví dụ: "#### 0:15 - Introduction to Svelte 5" (hoặc tương đương trong ngôn ngữ ${lang})
     *   Dưới mỗi tiêu đề chapter, tóm tắt nội dung chính của chapter đó theo độ dài ${length} yêu cầu, dựa vào transcript.
-    *   Nếu chapter có các điểm quan trọng cần nhấn mạnh, hãy sử dụng tiêu đề cấp 5 (#####) và bullet points cho các điểm này.
-    *   Nếu phân tích quá dài, hãy chia thành các điểm quan trọng hơn với tiêu đề cấp 5 (#####) và bullet points.
-        Ví dụ: "##### What are Runes?" (hoặc tương đương trong ngôn ngữ ${lang}) và sau đó giải thích điểm đó.
+    *   Nếu chapter có các điểm quan trọng cần nhấn mạnh, hãy sử dụng tiêu đề cấp 3 (###) và bullet points cho các điểm này.
+    *   Nếu phân tích quá dài, hãy chia thành các điểm quan trọng hơn với tiêu đề cấp 3 (###) và bullet points.
+        Ví dụ: "#### What are Runes?" (hoặc tương đương trong ngôn ngữ ${lang}) và sau đó giải thích điểm đó.
 6.  **Đảm bảo bao gồm:**
     *   Các luận điểm chính.
     *   Thuật ngữ quan trọng được giải thích (nếu có trong transcript).

@@ -33,9 +33,8 @@
   <div id="summary" class="prose-sm sm:prose-base max-w-none">
     {@html marked.parse(summary)}
   </div>
-  <div class="flex justify-center mt-4">
-    <TOC targetDivId="summary" />
-  </div>
+
+  <TOC targetDivId="summary" />
 {:else if !isLoading && !error}
   <!-- Optional: Add a placeholder if no summary and no error -->
   <!-- <p class="text-text-secondary text-center italic">No summary available.</p> -->

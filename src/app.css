@@ -57,6 +57,15 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 0.5rem;
+}
+
+.pong {
+  transform: translateY(-25%);
+}
+
+.prose h3 {
+  @apply transition-transform ease-out duration-200;
 }
 
 button {
@@ -139,6 +148,20 @@ button {
   }
 }
 
+animation: var(--animate-bounce); /* bounce 1s infinite */
+
+@keyframes bounce-2 {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
 /* Custom OverlayScrollbars Theme */
 .os-theme-custom-app.os-scrollbar {
   --os-size: 6px;
@@ -147,7 +170,7 @@ button {
   --os-track-border-radius: 10px;
   --os-track-bg: transparent; /* Nền track trong suốt */
   --os-handle-border-radius: 10px;
-  --os-handle-bg: oklch(0.77 0.003 106.6 / 40%); /* Màu handle mặc định */
+  --os-handle-bg: oklch(0.77 0.003 106.6 / 60%); /* Màu handle mặc định */
   --os-handle-bg-hover: var(--color-text-secondary); /* Màu handle khi hover */
   --os-handle-bg-active: var(--color-text-primary); /* Màu handle khi active */
 }

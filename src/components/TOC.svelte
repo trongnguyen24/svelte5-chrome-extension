@@ -27,9 +27,13 @@
       return
     }
 
-    const foundHeadings = targetDiv.querySelectorAll('h1, h2, h3, h4, h5, h6')
+    const foundHeadings = targetDiv.querySelectorAll('h3')
     headings = Array.from(foundHeadings).map((heading) => {
-      const text = heading.innerText
+      let text = heading.innerText
+      // Remove trailing colon if present
+      if (text.endsWith(':')) {
+        text = text.slice(0, -1)
+      }
       const id = heading.id || generateId(text)
       heading.id = id // Ensure heading has an ID
       return { text, id, level: parseInt(heading.tagName.substring(1)) }
@@ -39,7 +43,12 @@
   function scrollToHeading(id) {
     const element = document.getElementById(id)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      // element.scrollIntoView({ behavior: 'smooth' })
+      // Add animate-pulse class and remove after 3 seconds
+      element.classList.add('animate-pulse')
+      setTimeout(() => {
+        element.classList.remove('animate-pulse')
+      }, 4000)
     }
   }
 
@@ -60,28 +69,31 @@
       })
     }
   })
-
-  onDestroy(() => {
-    if (observer) {
-      observer.disconnect()
-    }
-  })
 </script>
 
-<nav class="p-4 bg-gray-100 dark:bg-gray-800 rounded-md">
-  <h2 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
-    Mục lục
-  </h2>
-  <ul>
+<div class="fixed z-20 right-3 top-40">
+  <div class="flex hidden flex-col gap-2">
     {#each headings as heading}
-      <li class="mb-1" style="margin-left: {(heading.level - 1) * 1}rem;">
+      <span
+        class="w-2 flex justify-center items-center h-0.5 bg-white rounded-2xl"
+      >
+        <span class="w-2 block blur-[1px] h-0.5 rounded-full bg-white"> </span>
+      </span>
+    {/each}
+  </div>
+  <nav
+    class="p-4 w-64 shadow-2xl border border-border bg-surface-1/90 dark:bg-surface-1/90 backdrop-blur-2xl rounded-md"
+  >
+    <div class="flex flex-col divide-y divide-border">
+      {#each headings as heading}
         <a
           href="#{heading.id}"
-          class="text-blue-600 hover:underline dark:text-blue-400"
+          onclick={() => scrollToHeading(heading.id)}
+          class="text-text-secondary block py-2 font-mono text-xs/4 no-underline line-clamp-2 hover:text-text-primary transition-colors"
         >
           {heading.text}
         </a>
-      </li>
-    {/each}
-  </ul>
-</nav>
+      {/each}
+    </div>
+  </nav>
+</div>
