@@ -46,6 +46,22 @@
 
     // Initialize OverlayScrollbars on the body element
     initialize(document.body)
+
+    // Lắng nghe message từ background script để cập nhật trạng thái loại tab
+    const handleMessage = (request, sender, sendResponse) => {
+      if (request.action === 'tabUpdated') {
+        console.log('[App.svelte] Received tabUpdated message:', request)
+        summaryStore.updateIsYouTubeVideoActive(request.isYouTube)
+      }
+      // Trả về true để giữ kênh message mở nếu cần phản hồi bất đồng bộ
+      // return true; // Không cần thiết nếu không gửi phản hồi
+    }
+    chrome.runtime.onMessage.addListener(handleMessage)
+
+    // Cleanup listener on destroy
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage)
+    }
   })
 
   onDestroy(() => {

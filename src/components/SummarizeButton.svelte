@@ -2,10 +2,10 @@
   import Icon from '@iconify/svelte'
   import { slideScaleFade } from '../lib/slideScaleFade.js' // Assuming path is correct
 
-  // Props nhận từ App.svelte (hoặc trực tiếp từ summaryStore nếu muốn)
+  // Props received from App.svelte (or directly from summaryStore if desired)
   let { isLoading, isChapterLoading } = $props()
 
-  // Event dispatcher để thông báo khi nút được click
+  // Event dispatcher to notify when the button is clicked
   const dispatch = () => {
     const customEvent = new CustomEvent('summarizeClick')
     document.dispatchEvent(customEvent) // Dispatch to document or a specific element
@@ -27,7 +27,7 @@
     onclick={dispatch}
     class="absolute z-10 inset-px text-primary bg-surface-1 group-hover:brightness-110 group-hover:shadow-lg group-hover:shadow-primary/30 group-hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center rounded-full disabled:cursor-progress"
     disabled={isLoading || isChapterLoading}
-    title="Tóm tắt trang hiện tại"
+    title="Summarize current page"
   >
     <div class="relative size-6">
       {#if isLoading || isChapterLoading}

@@ -2,13 +2,13 @@
   import Icon from '@iconify/svelte'
   import { marked } from 'marked'
 
-  // Props nhận từ App.svelte (hoặc trực tiếp từ summaryStore nếu muốn)
+  // Props received from App.svelte (or directly from summaryStore if desired)
   let { chapterSummary, isChapterLoading, chapterError } = $props()
 </script>
 
 {#if isChapterLoading}
   <div class="text-center p-4 text-text-secondary animate-pulse">
-    Đang tạo tóm tắt theo chapter...
+    Generating chapter summary...
   </div>
 {/if}
 
@@ -22,7 +22,7 @@
       icon="heroicons:exclamation-triangle-16-solid"
     />
     <p class="text-sm">
-      <span class="font-bold">Lỗi tóm tắt chapter:</span>
+      <span class="font-bold">Chapter summary error:</span>
       {chapterError}
     </p>
   </div>
@@ -33,6 +33,6 @@
     {@html marked.parse(chapterSummary)}
   </div>
 {:else if !isChapterLoading && !chapterError}
-  <!-- Có thể thêm placeholder nếu không có chapter summary và không lỗi -->
-  <!-- <p class="text-text-secondary text-center italic">Chưa có tóm tắt chapter.</p> -->
+  <!-- Optional: Add a placeholder if no chapter summary and no error -->
+  <!-- <p class="text-text-secondary text-center italic">No chapter summary available.</p> -->
 {/if}

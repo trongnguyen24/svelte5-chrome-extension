@@ -1,15 +1,15 @@
 // @svelte-compiler-ignore
-import { buildPrompt, buildChapterPrompt } from './utils.js' // Import các hàm tĩnh cần thiết
+import { buildPrompt, buildChapterPrompt } from './utils.js' // Import necessary static functions
 
 /**
- * Tóm tắt nội dung sử dụng Google Gemini.
- * @param {string} text - Nội dung cần tóm tắt (transcript hoặc text trang web).
+ * Summarizes content using Google Gemini.
+ * @param {string} text - Content to summarize (transcript or web page text).
  * @param {string} apiKey - Google AI API Key.
- * @param {boolean} isYouTube - True nếu nội dung là từ YouTube.
- * @param {string} lang - Ngôn ngữ mong muốn cho tóm tắt.
- * @param {string} length - Độ dài mong muốn cho tóm tắt ('short', 'medium', 'long').
- * @param {string} format - Định dạng mong muốn cho tóm tắt ('heading', 'paragraph').
- * @returns {Promise<string>} - Promise giải quyết với bản tóm tắt dưới dạng Markdown.
+ * @param {boolean} isYouTube - True if the content is from YouTube.
+ * @param {string} lang - Desired language for the summary.
+ * @param {string} length - Desired length for the summary ('short', 'medium', 'long').
+ * @param {string} format - Desired format for the summary ('heading', 'paragraph').
+ * @returns {Promise<string>} - Promise that resolves with the summary in Markdown format.
  */
 export async function summarizeWithGemini(
   text,
@@ -25,8 +25,18 @@ export async function summarizeWithGemini(
     )
   }
 
-  const prompt = buildPrompt(text, lang, length, format, isYouTube) // Sử dụng hàm buildPrompt đã cập nhật
-  const model = 'gemini-1.5-flash' // Use a recommended model
+  const prompt = buildPrompt(text, lang, length, format, isYouTube) // Use the updated buildPrompt function
+
+  let model = 'gemini-1.5-flash' // Default model
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+    const result = await chrome.storage.sync.get('selectedModel')
+    if (result.selectedModel) {
+      model = result.selectedModel
+    }
+  } else if (typeof localStorage !== 'undefined') {
+    model = localStorage.getItem('selectedModel_dev') || 'gemini-1.5-flash'
+  }
+
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=` +
     apiKey
@@ -70,12 +80,12 @@ export async function summarizeWithGemini(
 }
 
 /**
- * Tóm tắt nội dung video YouTube theo chapter sử dụng Google Gemini.
- * @param {string} timestampedTranscript - Transcript của video có kèm timestamp.
+ * Summarizes YouTube video content by chapter using Google Gemini.
+ * @param {string} timestampedTranscript - Video transcript with timestamps.
  * @param {string} apiKey - Google AI API Key.
- * @param {string} lang - Ngôn ngữ mong muốn cho tóm tắt chapter.
- * @param {string} length - Độ dài mong muốn cho tóm tắt chapter ('short', 'medium', 'long').
- * @returns {Promise<string>} - Promise giải quyết với bản tóm tắt theo chapter dưới dạng Markdown.
+ * @param {string} lang - Desired language for the chapter summary.
+ * @param {string} length - Desired length for the chapter summary ('short', 'medium', 'long').
+ * @returns {Promise<string>} - Promise that resolves with the chapter summary in Markdown format.
  */
 export async function summarizeChaptersWithGemini(
   timestampedTranscript,
@@ -89,9 +99,18 @@ export async function summarizeChaptersWithGemini(
     )
   }
 
-  const prompt = buildChapterPrompt(timestampedTranscript, lang, length) // Sử dụng hàm buildChapterPrompt đã cập nhật
+  const prompt = buildChapterPrompt(timestampedTranscript, lang, length) // Use the updated buildChapterPrompt function
 
-  const model = 'gemini-1.5-flash' // Cập nhật model nếu cần, ví dụ gemini-1.5-flash
+  let model = 'gemini-1.5-flash' // Default model
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+    const result = await chrome.storage.sync.get('selectedModel')
+    if (result.selectedModel) {
+      model = result.selectedModel
+    }
+  } else if (typeof localStorage !== 'undefined') {
+    model = localStorage.getItem('selectedModel_dev') || 'gemini-1.5-flash'
+  }
+
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=` +
     apiKey

@@ -9,6 +9,7 @@
   let summaryLength = $state('medium')
   let summaryLang = $state('vi') // Changed default to 'vi' to match options
   let summaryFormat = $state('heading') // Changed default to 'heading' to match options
+  let selectedModel = $state('gemini-1.5-flash') // Add state for selected model
   let saveStatus = $state('')
   let apiKeyDebounceTimer = null // Timer for debouncing API key save
 
@@ -19,13 +20,20 @@
       chrome.storage.sync
     ) {
       chrome.storage.sync.get(
-        ['geminiApiKey', 'summaryLength', 'summaryLang', 'summaryFormat'],
+        [
+          'geminiApiKey',
+          'summaryLength',
+          'summaryLang',
+          'summaryFormat',
+          'selectedModel',
+        ],
         (result) => {
           if (result.geminiApiKey) apiKey = result.geminiApiKey
           // Ensure defaults are set if nothing is in storage yet
           summaryLength = result.summaryLength || 'medium'
           summaryLang = result.summaryLang || 'vi'
           summaryFormat = result.summaryFormat || 'paragraph'
+          selectedModel = result.selectedModel || 'gemini-1.5-flash' // Load selected model
         }
       )
     } else {
@@ -35,6 +43,8 @@
       summaryLength = 'medium'
       summaryLang = 'vi'
       summaryFormat = 'paragraph'
+      selectedModel =
+        localStorage.getItem('selectedModel_dev') || 'gemini-1.5-flash' // Load selected model for dev
     }
   })
 
@@ -57,8 +67,9 @@
         if (key === 'summaryLength') summaryLength = value
         if (key === 'summaryLang') summaryLang = value
         if (key === 'summaryFormat') summaryFormat = value
+        if (key === 'selectedModel') selectedModel = value // Update selected model state
         // Optionally show a temporary confirmation, similar to saveStatus
-        // saveStatus = `Đã cập nhật ${key}!`;
+        // saveStatus = `Updated ${key}!`;
         // setTimeout(() => saveStatus = '', 1500);
         console.log(`Updated ${key} to ${value}`)
       })
@@ -67,10 +78,15 @@
       if (key === 'summaryLength') summaryLength = value
       if (key === 'summaryLang') summaryLang = value
       if (key === 'summaryFormat') summaryFormat = value
+      if (key === 'selectedModel') selectedModel = value // Update selected model state for dev
       // Also save to local storage for dev environment
       if (key === 'geminiApiKey' && typeof localStorage !== 'undefined') {
         localStorage.setItem('geminiApiKey_dev', value)
         console.log('Saved API Key to localStorage (dev)')
+      }
+      if (key === 'selectedModel' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('selectedModel_dev', value)
+        console.log('Saved selectedModel to localStorage (dev)')
       }
     }
   }
@@ -152,7 +168,7 @@
           class="absolute size-8 text-muted right-0.5 top-1 grid place-items-center cursor-pointer"
           onclick={() => (showApiKey = !showApiKey)}
           tabindex="0"
-          aria-label={showApiKey ? 'Ẩn API Key' : 'Hiển thị API Key'}
+          aria-label={showApiKey ? 'Hide API Key' : 'Show API Key'}
           onkeypress={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               showApiKey = !showApiKey
@@ -172,10 +188,47 @@
       </div>
     </div>
 
+    <!-- Gemini Model Section -->
+    <div class="flex flex-col gap-2">
+      <!-- svelte-ignore a11y_label_has_associated_control -->
+      <label class="block">Gemini Model</label>
+      <div class="flex p-0.5 gap-1">
+        <button
+          onclick={() => updateSetting('selectedModel', 'gemini-1.5-flash')}
+          class="setting-lang-btn {selectedModel === 'gemini-1.5-flash'
+            ? 'active'
+            : ''}"
+          title="gemini-1.5-flash"
+        >
+          1.5 flash
+        </button>
+        <button
+          onclick={() => updateSetting('selectedModel', 'gemini-2.0-flash')}
+          class="setting-lang-btn {selectedModel === 'gemini-2.0-flash'
+            ? 'active'
+            : ''}"
+          title="gemini-2.0-flash"
+        >
+          2.0 flash
+        </button>
+        <button
+          onclick={() =>
+            updateSetting('selectedModel', 'gemini-2.5-flash-preview-04-17')}
+          class="setting-lang-btn {selectedModel ===
+          'gemini-2.5-flash-preview-04-17'
+            ? 'active'
+            : ''}"
+          title="gemini-2.5-flash-preview-04-17"
+        >
+          2.5 flash
+        </button>
+      </div>
+    </div>
+
     <!-- Summary Length Section -->
     <div class="flex flex-col gap-1">
       <!-- svelte-ignore a11y_label_has_associated_control -->
-      <label class="block">Summary Length</label>
+      <label class="block">Summary Size</label>
       <div class="flex gap-2 w-fit">
         <button
           onclick={() => updateSetting('summaryLength', 'short')}
@@ -252,9 +305,10 @@
         >
           English
         </button>
-        <!-- Thêm nút cho ngôn ngữ khác nếu cần -->
+        <!-- Add button for other languages if needed -->
       </div>
     </div>
+
     <div class="flex flex-col gap-2">
       <!-- svelte-ignore a11y_label_has_associated_control -->
       <label class="block">Theme</label>

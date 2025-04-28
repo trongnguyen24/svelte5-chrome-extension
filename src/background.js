@@ -202,3 +202,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 })
 
 console.log('[background.js] Message listener added.')
+
+// 3. Lắng nghe sự kiện chuyển tab để cập nhật trạng thái loại tab
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId)
+    if (tab && tab.url) {
+      const isYouTube = tab.url.includes('youtube.com/watch')
+      console.log(
+        `[background.js] Tab activated: ${tab.url}, Is YouTube: ${isYouTube}`
+      )
+      // Gửi message đến side panel (hoặc các phần khác lắng nghe)
+      chrome.runtime
+        .sendMessage({
+          action: 'tabUpdated',
+          isYouTube: isYouTube,
+          tabId: tab.id, // Gửi kèm tabId để tiện xử lý nếu cần
+        })
+        .catch((error) => {
+          // Bắt lỗi nếu không có listener nào hoặc side panel chưa mở
+          if (
+            error.message.includes('Could not establish connection') ||
+            error.message.includes('Receiving end does not exist')
+          ) {
+            console.warn(
+              '[background.js] Side panel not open or no listener for tabUpdated message.'
+            )
+          } else {
+            console.error(
+              '[background.js] Error sending tabUpdated message:',
+              error
+            )
+          }
+        })
+    }
+  } catch (error) {
+    console.error('[background.js] Error in onActivated listener:', error)
+  }
+})
+
+console.log('[background.js] Tab activation listener added.')

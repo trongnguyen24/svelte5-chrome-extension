@@ -55,6 +55,10 @@
   --color-error: oklch(0.637 0.237 25.331);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 button {
   @apply cursor-pointer select-none;
 }

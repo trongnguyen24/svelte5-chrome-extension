@@ -2,6 +2,7 @@
 // @svelte-compiler-ignore
 import { marked } from 'marked'
 import { getPageContent } from '../services/contentService.js'
+import { getActiveTabInfo } from '../services/chromeService.js' // Import getActiveTabInfo
 import { settingsStore } from './settingsStore.svelte.js' // Import the settingsStore object
 import { summarizeWithGemini, summarizeChaptersWithGemini } from '../lib/api.js' // Assuming api.js is updated or compatible
 
@@ -33,6 +34,15 @@ function resetState() {
   chapterError = ''
   isYouTubeVideoActive = false
   currentContentSource = ''
+}
+
+/**
+ * Updates the isYouTubeVideoActive state.
+ * @param {boolean} isYouTube - Whether the current tab is a YouTube video.
+ */
+function updateIsYouTubeVideoActive(isYouTube) {
+  isYouTubeVideoActive = isYouTube
+  console.log(`[summaryStore] isYouTubeVideoActive updated to: ${isYouTube}`)
 }
 
 /**
@@ -72,30 +82,53 @@ export async function fetchAndSummarize() {
       throw new Error('Chưa cấu hình API Key trong cài đặt.')
     }
 
-    // 2. Get Page Content (determine if YouTube)
-    // For the main summary, we always need the basic transcript or webpage text
+    // 2. Xác định loại tab trước khi lấy nội dung
+    console.log('[summaryStore] Đang kiểm tra loại tab...')
+    const tabInfo = await getActiveTabInfo() // Lấy thông tin tab hiện tại bằng getActiveTabInfo
+    if (!tabInfo || !tabInfo.url) {
+      throw new Error('Không thể lấy thông tin tab hiện tại hoặc URL.')
+    }
+    const YOUTUBE_MATCH_PATTERN = /youtube\.com\/watch/i // Định nghĩa lại pattern nếu cần, hoặc import từ contentService
+    isYouTubeVideoActive = YOUTUBE_MATCH_PATTERN.test(tabInfo.url)
+    console.log(
+      `[summaryStore] Tab hiện tại là: ${tabInfo.url}. YouTube video: ${isYouTubeVideoActive}`
+    )
+
+    // 3. Quyết định loại nội dung cần lấy cho tóm tắt chính
+    let mainContentTypeToFetch = 'webpageText' // Mặc định là web
+    if (isYouTubeVideoActive) {
+      mainContentTypeToFetch = 'transcript' // Nếu là YouTube, lấy transcript thường
+    }
+    console.log(
+      `[summaryStore] Sẽ lấy loại nội dung chính: ${mainContentTypeToFetch}`
+    )
+
+    // 4. Get Page Content cho tóm tắt chính
     const mainContentResult = await getPageContent(
-      'transcript',
+      mainContentTypeToFetch,
       appSettings.summaryLang
-    ) // Request transcript for YT, will fallback to webpage text
+    )
 
     if (mainContentResult.type === 'error' || !mainContentResult.content) {
       throw new Error(
-        mainContentResult.error || 'Không thể lấy nội dung trang.'
+        mainContentResult.error || 'Không thể lấy nội dung trang chính.'
       )
     }
 
-    isYouTubeVideoActive = mainContentResult.type === 'youtube'
     currentContentSource = mainContentResult.content // Store the fetched content
 
     // --- Start Chapter Summarization in Parallel (if YouTube) ---
     if (isYouTubeVideoActive) {
       isChapterLoading = true // Start chapter loading
+      console.log(
+        '[summaryStore] Bắt đầu lấy transcript có timestamp cho chapters...'
+      )
       // Use IIAFE for parallel execution without awaiting here
       ;(async () => {
         chapterError = '' // Reset chapter error specifically
         try {
           // Fetch timestamped transcript specifically for chapters
+          // Luôn yêu cầu 'timestampedTranscript' cho phần này
           const chapterContentResult = await getPageContent(
             'timestampedTranscript',
             appSettings.summaryLang
@@ -106,9 +139,12 @@ export async function fetchAndSummarize() {
           ) {
             throw new Error(
               chapterContentResult.error ||
-                'Không thể lấy transcript có timestamp.'
+                'Không thể lấy transcript có timestamp cho chapter.'
             )
           }
+          console.log(
+            '[summaryStore] Đã lấy transcript có timestamp, bắt đầu tóm tắt chapter...'
+          )
 
           const chapterSummarizedText = await summarizeChaptersWithGemini(
             chapterContentResult.content,
@@ -134,6 +170,11 @@ export async function fetchAndSummarize() {
           isChapterLoading = false // End chapter loading regardless of outcome
         }
       })()
+    } else {
+      // Nếu không phải YouTube, đảm bảo không có trạng thái loading chapter
+      isChapterLoading = false
+      chapterSummary = ''
+      chapterError = ''
     }
 
     // --- Continue Main Summarization (Awaited) ---
@@ -160,11 +201,11 @@ export async function fetchAndSummarize() {
     console.error('[summaryStore] Lỗi trong quá trình tóm tắt chính:', e)
     error = e.message || 'Đã xảy ra lỗi không mong muốn.'
     // Ensure chapter loading stops if main process fails early
-    if (isChapterLoading && !chapterError) {
-      // isChapterLoading = false; // Let the parallel process handle its own loading state
-    }
+    // if (isChapterLoading && !chapterError) { // Let the parallel process handle its own loading state
+    // }
   } finally {
     isLoading = false // End main loading
+    // Không cần đặt isChapterLoading = false ở đây nữa vì nó được xử lý trong khối if/else và IIAFE
   }
 }
 

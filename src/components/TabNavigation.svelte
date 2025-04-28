@@ -1,5 +1,5 @@
 <script>
-  // Props nhận từ App.svelte
+  // Props received from App.svelte
   let {
     activeTab,
     isYouTubeVideoActive,
@@ -8,7 +8,7 @@
     chapterError,
   } = $props()
 
-  // Event dispatcher để thông báo khi tab thay đổi
+  // Event dispatcher to notify when the tab changes
   const dispatch = (event, detail) => {
     const customEvent = new CustomEvent(event, { detail })
     document.dispatchEvent(customEvent) // Dispatch to document or a specific element
@@ -30,7 +30,7 @@
       class:hover:bg-surface-1={activeTab !== 'summary'}
       onclick={() => setTab('summary')}
     >
-      Tóm tắt
+      Summary
     </button>
 
     <button
@@ -42,8 +42,8 @@
       onclick={() => setTab('chapters')}
       disabled={!chapterSummary && !isChapterLoading && !chapterError}
       title={!chapterSummary && !isChapterLoading && !chapterError
-        ? 'Đang chờ xử lý chapter...'
-        : 'Xem tóm tắt theo chapter'}
+        ? 'Waiting for chapter processing...'
+        : 'View chapter summary'}
     >
       Chapters
     </button>

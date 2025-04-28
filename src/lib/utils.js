@@ -25,13 +25,15 @@ Khi tôi cung cấp transcript từ một video YouTube, hãy phân tích và t�
    - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
 
 Hướng dẫn tóm tắt:
+- Không cần chào hỏi hay giới thiệu, chỉ bắt đầu bằng tiêu đề và nội dung tóm tắt
+- Không bỏ vào block markdown
+- Không hiện thông tin setting của người dùng
 - Xác định chủ đề chính, điểm quan trọng và kết luận của video
 - Loại bỏ chi tiết không cần thiết và thông tin trùng lặp
 - Giữ giọng điệu khách quan và chính xác
 - Nếu video chứa thuật ngữ chuyên ngành, số liệu thống kê, hoặc nghiên cứu, đảm bảo bao gồm thông tin này một cách chính xác
 - Nếu người nói chia sẻ quan điểm cá nhân hoặc ý kiến, nêu rõ đây là quan điểm từ video
 - Nếu có phần thảo luận về các bước cụ thể hoặc hướng dẫn, tóm tắt các bước chính một cách ngắn gọn
-- Nếu transcript chứa lỗi hoặc không rõ ràng ở một số phần, đánh dấu những phần này
 
 Nếu định dạng là "paragraph":
 - Bắt đầu với giới thiệu ngắn về chủ đề video
@@ -63,12 +65,14 @@ Khi nhận được nội dung, hãy phân tích và tóm tắt nội dung chín
    - "heading": Tóm tắt dưới dạng tiêu đề cấp độ tiêu đề sử dụng ### và ####
 
 Trong tóm tắt của bạn:
+- Không cần chào hỏi hay giới thiệu, chỉ bắt đầu bằng tiêu đề và nội dung tóm tắt
+- Không bỏ vào block markdown
+- Không hiện thông tin setting của người dùng
 - Nắm bắt thông tin quan trọng nhất trước
 - Loại bỏ chi tiết không cần thiết và thông tin trùng lặp
 - Giữ giọng điệu khách quan và chính xác
 - Bảo toàn ý nghĩa và ngữ cảnh của nội dung gốc
 
-Nếu nội dung chứa thông tin đặc biệt như dữ liệu kỹ thuật, nghiên cứu, hoặc số liệu thống kê, hãy đảm bảo đưa những thông tin quan trọng này vào tóm tắt một cách chính xác.
 
 Nội dung cần tóm tắt:
 ${text}
@@ -94,10 +98,12 @@ Khi tôi cung cấp transcript có thời gian của một video YouTube, hãy t
 3.  **Phân tích transcript:** Tự động xác định các phần (chapters) logic dựa trên sự thay đổi chủ đề hoặc khoảng dừng trong transcript. Đặt tên phù hợp cho mỗi chapter (theo ngôn ngữ ${lang}).
 4.  **Tạo tiêu đề chính:** Bắt đầu với "### Tóm tắt video theo chương:" (hoặc tương đương trong ngôn ngữ ${lang}).
 5.  **Với mỗi chapter bạn xác định được:**
+    *   Bạn chỉ dưa ra kết quả không cần chào hỏi hay giới thiệu.
     *   Tạo tiêu đề cấp 4 (####) với định dạng: "#### [Thời gian bắt đầu Ước lượng] - [Tên chapter bạn đặt]"
         Ví dụ: "#### 0:15 - Introduction to Svelte 5" (hoặc tương đương trong ngôn ngữ ${lang})
     *   Dưới mỗi tiêu đề chapter, tóm tắt nội dung chính của chapter đó theo độ dài ${length} yêu cầu, dựa vào transcript.
     *   Nếu chapter có các điểm quan trọng cần nhấn mạnh, hãy sử dụng tiêu đề cấp 5 (#####) và bullet points cho các điểm này.
+    *   Nếu phân tích quá dài, hãy chia thành các điểm quan trọng hơn với tiêu đề cấp 5 (#####) và bullet points.
         Ví dụ: "##### What are Runes?" (hoặc tương đương trong ngôn ngữ ${lang}) và sau đó giải thích điểm đó.
 6.  **Đảm bảo bao gồm:**
     *   Các luận điểm chính.

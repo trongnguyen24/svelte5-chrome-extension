@@ -34,17 +34,18 @@ function getWebpageText() {
 
 /**
  * Lấy nội dung từ tab hiện tại.
- * Tự động xác định là trang YouTube hay trang web thường.
- * @param {'transcript' | 'timestampedTranscript' | 'webpage'} contentType Loại nội dung cần lấy.
- *        'transcript': Chỉ lấy text transcript từ YouTube.
- *        'timestampedTranscript': Lấy transcript kèm timestamp từ YouTube.
- *        'webpage': Lấy text từ trang web bất kỳ (sẽ tự động áp dụng nếu không phải YouTube).
+ * Tự động xác định là trang YouTube hay trang web thường dựa trên URL.
+ * @param {'transcript' | 'timestampedTranscript' | 'webpageText'} contentType Loại nội dung cần lấy.
+ *        'transcript': Chỉ lấy text transcript từ YouTube (nếu là trang YouTube).
+ *        'timestampedTranscript': Lấy transcript kèm timestamp từ YouTube (nếu là trang YouTube).
+ *        'webpageText': Lấy text từ body trang web (áp dụng cho mọi loại trang).
  * @param {string} [preferredLang='en'] Ngôn ngữ ưu tiên cho transcript YouTube.
  * @returns {Promise<{ type: 'youtube' | 'webpage' | 'error', content: string | null, error?: string }>}
- *          Object chứa loại trang, nội dung và lỗi (nếu có).
+ *          Object chứa loại trang (dựa trên URL), nội dung và lỗi (nếu có).
+ *          Lưu ý: `type` trả về ('youtube' hoặc 'webpage') phản ánh loại trang thực tế, không phải `contentType` yêu cầu.
  */
 export async function getPageContent(
-  contentType = 'webpage',
+  contentType = 'webpageText',
   preferredLang = 'en'
 ) {
   const tab = await getActiveTabInfo()
@@ -57,16 +58,53 @@ export async function getPageContent(
   }
 
   const isYouTubeVideo = YOUTUBE_MATCH_PATTERN.test(tab.url)
+  const actualPageType = isYouTubeVideo ? 'youtube' : 'webpage'
 
-  if (isYouTubeVideo && contentType !== 'webpage') {
-    // Xử lý YouTube
+  console.log(
+    `[contentService] Tab ID: ${tab.id}, URL: ${tab.url}, Is YouTube: ${isYouTubeVideo}, Requested Type: ${contentType}`
+  )
+
+  if (contentType === 'webpageText') {
+    console.log(
+      '[contentService] Yêu cầu lấy nội dung text từ trang web (webpageText)...'
+    )
+    try {
+      const pageText = await executeFunction(tab.id, getWebpageText)
+      if (pageText) {
+        console.log('[contentService] Lấy nội dung webpageText thành công.')
+        return { type: actualPageType, content: pageText }
+      } else {
+        console.warn('[contentService] Không lấy đủ nội dung webpageText.')
+        return {
+          type: 'error',
+          content: null,
+          error: 'Không thể lấy đủ nội dung text từ trang web.',
+        }
+      }
+    } catch (error) {
+      console.error(
+        '[contentService] Lỗi khi thực thi script lấy webpageText:',
+        error
+      )
+      return {
+        type: 'error',
+        content: null,
+        error: `Lỗi khi lấy nội dung webpageText: ${error.message}`,
+      }
+    }
+  }
+
+  if (
+    isYouTubeVideo &&
+    (contentType === 'transcript' || contentType === 'timestampedTranscript')
+  ) {
     const action =
       contentType === 'timestampedTranscript'
         ? 'fetchTranscriptWithTimestamp'
         : 'fetchTranscript'
     try {
       console.log(
-        `[contentService] Gửi yêu cầu ${action} đến tab ${tab.id} với ngôn ngữ ${preferredLang}`
+        `[contentService] Gửi yêu cầu ${action} (vì là YouTube và yêu cầu ${contentType}) đến tab ${tab.id} với ngôn ngữ ${preferredLang}`
       )
       const response = await sendMessageToTab(tab.id, {
         action: action,
@@ -91,7 +129,7 @@ export async function getPageContent(
           content: null,
           error:
             response?.error ||
-            `Không thể lấy ${contentType} từ content script.`,
+            `Không thể lấy ${contentType} từ content script YouTube.`,
         }
       }
     } catch (error) {
@@ -99,32 +137,32 @@ export async function getPageContent(
       return {
         type: 'error',
         content: null,
-        error: `Lỗi giao tiếp với content script: ${error.message}`,
+        error: `Lỗi giao tiếp với content script YouTube: ${error.message}`,
       }
     }
-  } else {
-    // Xử lý trang web thường (hoặc YouTube nhưng yêu cầu là 'webpage')
-    console.log('[contentService] Lấy nội dung text từ trang web...')
-    try {
-      const pageText = await executeFunction(tab.id, getWebpageText)
-      if (pageText) {
-        console.log('[contentService] Lấy nội dung trang web thành công.')
-        return { type: 'webpage', content: pageText }
-      } else {
-        return {
-          type: 'error',
-          content: null,
-          error: 'Không thể lấy đủ nội dung text từ trang web.',
-        }
-      }
-    } catch (error) {
-      console.error('[contentService] Lỗi khi thực thi script lấy text:', error)
-      return {
-        type: 'error',
-        content: null,
-        error: `Lỗi khi lấy nội dung trang web: ${error.message}`,
-      }
+  }
+
+  if (
+    !isYouTubeVideo &&
+    (contentType === 'transcript' || contentType === 'timestampedTranscript')
+  ) {
+    console.warn(
+      `[contentService] Yêu cầu lấy ${contentType} nhưng đây không phải trang YouTube. URL: ${tab.url}`
+    )
+    return {
+      type: 'error',
+      content: null,
+      error: `Không thể lấy ${contentType} vì đây không phải trang YouTube.`,
     }
+  }
+
+  console.error(
+    `[contentService] Trường hợp không xử lý được: isYouTube=${isYouTubeVideo}, contentType=${contentType}`
+  )
+  return {
+    type: 'error',
+    content: null,
+    error: 'Logic không xác định trong getPageContent.',
   }
 }
 
