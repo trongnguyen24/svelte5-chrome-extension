@@ -13,6 +13,13 @@
   // State for UI tabs
   let activeTab = $state('summary')
 
+  // Tự động chuyển về tab summary khi không phải là video YouTube
+  $effect(() => {
+    if (!summaryStore.isYouTubeVideoActive) {
+      activeTab = 'summary'
+    }
+  })
+
   const options = {
     scrollbars: {
       autoHide: 'scroll',
@@ -77,11 +84,11 @@
   // ensureContentScriptInjected, handleSummarizeText, OverlayScrollbars, onMount/onDestroy related to them.
 </script>
 
-<div class="bg-background min-h-screen xs:px-8 xs:pb-32 pt-40">
+<div class="bg-background min-h-screen xs:px-8 xs:pb-[50vh] pt-40">
   <!-- Main Content -->
   <div class="max-w-2xl mx-auto flex flex-col">
     <div
-      class="px-4 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between header-animation"
+      class="px-5 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between header-animation"
     >
       <!-- Use SummarizeButton component -->
       <SummarizeButton
@@ -100,7 +107,7 @@
         !summaryStore.isLoading &&
         !summaryStore.isChapterLoading}
     >
-      {#if summaryStore.isLoading || summaryStore.isChapterLoading || summaryStore.summary || summaryStore.chapterSummary || summaryStore.error || summaryStore.chapterError}
+      {#if (activeTab === 'summary' && (summaryStore.isLoading || summaryStore.summary || summaryStore.error)) || (activeTab === 'chapters' && (summaryStore.isChapterLoading || summaryStore.chapterSummary || summaryStore.chapterError))}
         <div
           class="px-4 xs:px-0 flex justify-center mb-[-1.5rem] relative z-10"
         >
@@ -115,7 +122,7 @@
         </div>
 
         <div
-          class="p-4 xs:p-8 pb-20 prose w-full max-w-2xl bg-surface-1 border border-border/25 border-t-white dark:border-t-neutral-600 xs:shadow-lg xs:rounded-xl min-h-[10rem]"
+          class="p-5 xs:p-8 pb-[50vh] prose w-full max-w-2xl bg-surface-1 border border-border/25 border-t-white dark:border-t-neutral-600 xs:shadow-lg xs:rounded-xl min-h-[10rem]"
         >
           {#if activeTab === 'summary'}
             <!-- Use SummaryDisplay component -->

@@ -41,8 +41,8 @@ Nếu định dạng là "paragraph":
 - Kết thúc bằng kết luận hoặc ý nghĩa của video
 
 Nếu định dạng là "heading":
-- Sử dụng ### cho tiêu đề chính (chủ đề video)
-- Sử dụng #### cho các tiêu đề phụ (điểm chính)
+- Sử dụng ## cho tiêu đề chính (chủ đề video)
+- Sử dụng ### cho các tiêu đề phụ (điểm chính)
 - Dưới mỗi tiêu đề, cung cấp nội dung tóm tắt liên quan
 
 Transcript video:
@@ -100,18 +100,18 @@ Khi tôi cung cấp transcript có thời gian của một video YouTube, hãy t
 5.  **Với mỗi chapter bạn xác định được:**
     *   Bạn chỉ dưa ra kết quả không cần chào hỏi hay giới thiệu.
     *   Tạo tiêu đề cấp 3 (###) với định dạng: "### [Thời gian bắt đầu Ước lượng] - [Tên chapter bạn đặt]"
-        Ví dụ: "#### 0:15 - Introduction to Svelte 5" (hoặc tương đương trong ngôn ngữ ${lang})
+        Ví dụ: "### 0:15 - Introduction to Svelte 5" (hoặc tương đương trong ngôn ngữ ${lang})
     *   Dưới mỗi tiêu đề chapter, tóm tắt nội dung chính của chapter đó theo độ dài ${length} yêu cầu, dựa vào transcript.
     *   Nếu chapter có các điểm quan trọng cần nhấn mạnh, hãy sử dụng tiêu đề cấp 3 (###) và bullet points cho các điểm này.
     *   Nếu phân tích quá dài, hãy chia thành các điểm quan trọng hơn với tiêu đề cấp 3 (###) và bullet points.
-        Ví dụ: "#### What are Runes?" (hoặc tương đương trong ngôn ngữ ${lang}) và sau đó giải thích điểm đó.
+        Ví dụ: "### What are Runes?" (hoặc tương đương trong ngôn ngữ ${lang}) và sau đó giải thích điểm đó.
 6.  **Đảm bảo bao gồm:**
     *   Các luận điểm chính.
     *   Thuật ngữ quan trọng được giải thích (nếu có trong transcript).
     *   Kết luận hoặc ý chính cuối cùng (nếu có).
 7.  **Sử dụng định dạng markdown:**
-    *   #### cho tiêu đề chapter với thời gian.
-    *   ##### cho các điểm quan trọng trong chapter.
+    *   ### cho tiêu đề chapter với thời gian.
+    *   #### cho các điểm quan trọng trong chapter.
     *   **In đậm** cho thuật ngữ/khái niệm quan trọng.
 8.  **Kết thúc:** Bằng phần "### Kết luận chung" (hoặc tương đương trong ngôn ngữ ${lang}) tóm tắt thông điệp tổng thể.
 

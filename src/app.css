@@ -10,7 +10,7 @@
   --color-surface-2: oklch(99.1% 0.0015 277.7);
   --color-border: oklch(88.8% 0.0093 277.7);
   --color-text-primary: oklch(50.3% 0.0139 277.7);
-  --color-text-secondary: oklch(79.4% 0.016 277.7);
+  --color-text-secondary: oklch(70.4% 0.016 277.7);
   --color-muted: oklch(85.3% 0.0117 277.7);
   --color-primary: oklch(69.1% 0.1909 45.02);
   --color-success: oklch(0.768 0.233 130.85);
@@ -136,6 +136,14 @@ button {
   animation-range: 0 300px;
 }
 
+.toc-animation {
+  animation-name: fade-scroll;
+  animation-duration: auto;
+  animation-fill-mode: both;
+  animation-timeline: scroll();
+  animation-range: 160px 220px;
+}
+
 @keyframes shrink-and-fade {
   2% {
     transform: scale(1) translateY(0); /* Kích thước bình thường */
@@ -148,7 +156,16 @@ button {
   }
 }
 
-animation: var(--animate-bounce); /* bounce 1s infinite */
+@keyframes fade-scroll {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
 @keyframes bounce-2 {
   0%,

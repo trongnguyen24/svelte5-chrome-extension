@@ -1,6 +1,7 @@
 <script>
   import Icon from '@iconify/svelte'
   import { marked } from 'marked'
+  import TOC from './TOC.svelte'
 
   // Props received from App.svelte (or directly from summaryStore if desired)
   let { chapterSummary, isChapterLoading, chapterError } = $props()
@@ -29,9 +30,11 @@
 {/if}
 
 {#if chapterSummary && !isChapterLoading}
-  <div class="prose-sm sm:prose-base max-w-none">
+  <div id="chaptersummary" class="prose-sm sm:prose-base max-w-none">
     {@html marked.parse(chapterSummary)}
   </div>
+
+  <TOC targetDivId="chaptersummary" />
 {:else if !isChapterLoading && !chapterError}
   <!-- Optional: Add a placeholder if no chapter summary and no error -->
   <!-- <p class="text-text-secondary text-center italic">No chapter summary available.</p> -->
