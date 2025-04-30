@@ -141,7 +141,7 @@ button {
   animation-duration: auto;
   animation-fill-mode: both;
   animation-timeline: scroll();
-  animation-range: 160px 220px;
+  animation-range: 40px 190px;
 }
 
 @keyframes shrink-and-fade {

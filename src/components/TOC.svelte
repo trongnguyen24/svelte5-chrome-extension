@@ -31,7 +31,7 @@
     const targetDiv = document.getElementById(targetDivId)
     if (!targetDiv) return
 
-    const headingElements = targetDiv.querySelectorAll('h3')
+    const headingElements = targetDiv.querySelectorAll('h2,h3')
     let currentActiveHeadingId = null
 
     for (let i = headingElements.length - 1; i >= 0; i--) {
@@ -71,7 +71,7 @@
       return
     }
 
-    const foundHeadings = targetDiv.querySelectorAll('h3')
+    const foundHeadings = targetDiv.querySelectorAll('h2,h3')
     headings = Array.from(foundHeadings).map((heading) => {
       let text = heading.innerText
       // Remove trailing colon if present
@@ -207,15 +207,24 @@
           <a
             href="#{heading.id}"
             onclick={() => scrollToHeading(heading.id)}
-            class="block shrink-0 px-4 py-2 font-mono text-xs/4 no-underline line-clamp-2 overflow-hidden transition-colors
+            class="px-3 py-2 font-mono text-xs/4 no-underline transition-colors
           {heading.id === activeHeadingId
               ? 'text-text-primary bg-black/5 dark:bg-white/5'
-              : 'text-text-secondary hover:text-text-primary'}"
+              : 'text-text-secondary hover:text-text-primary'}
+          lv{heading.level}"
           >
-            {heading.text}
+            <span class="line-clamp-2">
+              {heading.text}
+            </span>
           </a>
         {/each}
       </div>
     </div>
   </nav>
 </div>
+
+<style>
+  .lv2 {
+    font-weight: 600;
+  }
+</style>
