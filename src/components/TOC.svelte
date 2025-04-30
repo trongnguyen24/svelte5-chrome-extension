@@ -31,7 +31,7 @@
     const targetDiv = document.getElementById(targetDivId)
     if (!targetDiv) return
 
-    const headingElements = targetDiv.querySelectorAll('h2,h3')
+    const headingElements = targetDiv.querySelectorAll('h2,h3,h4')
     let currentActiveHeadingId = null
 
     for (let i = headingElements.length - 1; i >= 0; i--) {
@@ -173,28 +173,25 @@
   })
 </script>
 
-<div
-  class="fixed toc-animation z-20 right-1 xs:right-2 bottom-18 group p-2 pl-3"
->
+<div class="fixed toc-animation z-20 right-0 bottom-18 group p-2 pr-3 pl-3">
   <div
-    class="flex col-start-1 row-start-1 group-hover:opacity-0 transition-all flex-col gap-2"
+    class="flex items-end group-hover:opacity-0 transition-all flex-col gap-1.5"
   >
     {#each headings as heading}
       <span
-        class="w-1 flex justify-center items-center h-px dark:bg-white rounded-2xl {heading.id ===
-        activeHeadingId
+        class="w-1 flex h-px dark:bg-white {heading.id === activeHeadingId
           ? 'opacity-100 bg-primary'
-          : 'opacity-50 bg-text-secondary'}"
+          : 'opacity-50 bg-text-secondary'} lvs{heading.level}"
       >
         <span
-          class="w-1 block blur-[1px] h-px rounded-full bg-text-secondary dark:bg-white"
+          class="block blur-[1px] h-px rounded-full bg-text-secondary dark:bg-white"
         >
         </span>
       </span>
     {/each}
   </div>
   <nav
-    class="fixed -bottom-4 p-4 pr-2 right-0 hidden group-hover:block opacity-0 group-hover:opacity-100"
+    class="fixed -bottom-4 p-4 pr-3 right-0 xs:pr-6 hidden group-hover:block opacity-0 group-hover:opacity-100"
   >
     <div
       id="toc-scroll"
@@ -225,6 +222,17 @@
 
 <style>
   .lv2 {
-    font-weight: 600;
+  }
+  .lv3 {
+    padding-left: 1.5rem;
+  }
+  .lv4 {
+    padding-left: 2.5rem;
+  }
+  .lvs2 {
+    width: 0.25rem;
+  }
+  .lvs3 {
+    width: 0.125rem;
   }
 </style>

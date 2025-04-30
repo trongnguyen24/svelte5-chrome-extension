@@ -237,6 +237,7 @@ export const summaryStore = {
     return currentContentSource
   },
   fetchAndSummarize, // Also export the action
+  updateIsYouTubeVideoActive, // Export the update function
 }
 
 console.log('summaryStore.svelte.js loaded')

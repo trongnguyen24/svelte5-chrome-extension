@@ -88,9 +88,9 @@
   <!-- Main Content -->
   <div class="max-w-2xl mx-auto flex flex-col">
     <div
-      class="px-5 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between"
+      class="px-5 py-3 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between header-animation"
     >
-      Title tab
+      title tab
     </div>
     <div
       class="px-5 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between header-animation"
