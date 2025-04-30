@@ -218,6 +218,8 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
           action: 'tabUpdated',
           isYouTube: isYouTube,
           tabId: tab.id, // Gửi kèm tabId để tiện xử lý nếu cần
+          tabUrl: tab.url, // Gửi kèm URL của tab
+          tabTitle: tab.title, // Gửi kèm tiêu đề của tab
         })
         .catch((error) => {
           // Bắt lỗi nếu không có listener nào hoặc side panel chưa mở
