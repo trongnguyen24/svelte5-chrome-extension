@@ -9,6 +9,7 @@
   import ChapterDisplay from './components/ChapterDisplay.svelte' // Import new component
   import { summaryStore } from './stores/summaryStore.svelte.js' // Import the summaryStore object
   import { theme, setTheme } from './stores/themeStore.svelte' // Import theme store and setTheme function
+  import { tabTitleStore } from './stores/tabTitleStore.svelte.js' // Import the tabTitleStore
 
   // State for UI tabs
   let activeTab = $state('summary')
@@ -59,11 +60,28 @@
       if (request.action === 'tabUpdated') {
         console.log('[App.svelte] Received tabUpdated message:', request)
         summaryStore.updateIsYouTubeVideoActive(request.isYouTube)
+        tabTitleStore.set(request.tabTitle) // Update the tabTitleStore
+      } else if (request.action === 'currentTabInfo') {
+        // Handle response for initial tab info request
+        console.log('[App.svelte] Received currentTabInfo response:', request)
+        tabTitleStore.set(request.tabTitle)
+        summaryStore.updateIsYouTubeVideoActive(request.isYouTube)
       }
       // Trả về true để giữ kênh message mở nếu cần phản hồi bất đồng bộ
       // return true; // Không cần thiết nếu không gửi phản hồi
     }
     chrome.runtime.onMessage.addListener(handleMessage)
+
+    // Request current tab info from background script on mount
+    chrome.runtime
+      .sendMessage({ action: 'requestCurrentTabInfo' })
+      .catch((error) => {
+        // Catch error if background script is not ready or listener not added yet
+        console.warn(
+          '[App.svelte] Could not send requestCurrentTabInfo message:',
+          error
+        )
+      })
 
     // Cleanup listener on destroy
     return () => {
@@ -90,7 +108,7 @@
     <div
       class="px-5 py-3 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between header-animation"
     >
-      title tab
+      {$tabTitleStore}
     </div>
     <div
       class="px-5 py-16 fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl z-10 xs:px-8 flex items-center justify-between header-animation"

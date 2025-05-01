@@ -113,13 +113,74 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 })
 
-// // Tùy chọn: Lắng nghe thay đổi URL để chèn script nếu người dùng điều hướng đến YouTube
-// chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-//   if (changeInfo.status === 'complete' && tab.url && tab.url.includes('youtube.com/watch')) {
-//      console.log(`YouTube page loaded/updated: ${tab.url}. Attempting injection...`);
-//      await injectContentScript(tabId);
-//   }
-// });
+// Tùy chọn: Lắng nghe thay đổi URL để chèn script nếu người dùng điều hướng đến YouTube
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  // Gửi message cập nhật tiêu đề ngay khi có thay đổi tiêu đề
+  if (changeInfo.title) {
+    console.log(`[background.js] Tab title updated: ${changeInfo.title}`)
+    chrome.runtime
+      .sendMessage({
+        action: 'tabUpdated',
+        isYouTube: tab.url.includes('youtube.com/watch'), // Sử dụng tab.url vì changeInfo.url có thể chưa có
+        tabId: tab.id,
+        tabUrl: tab.url,
+        tabTitle: changeInfo.title, // Sử dụng tiêu đề từ changeInfo
+      })
+      .catch((error) => {
+        if (
+          error.message.includes('Could not establish connection') ||
+          error.message.includes('Receiving end does not exist')
+        ) {
+          console.warn(
+            '[background.js] Side panel not open or no listener for tabUpdated message (title update).'
+          )
+        } else {
+          console.error(
+            '[background.js] Error sending tabUpdated message (title update):',
+            error
+          )
+        }
+      })
+  }
+
+  // Logic cũ: inject script khi trang tải xong và là YouTube
+  if (
+    changeInfo.status === 'complete' &&
+    tab.url &&
+    tab.url.includes('youtube.com/watch')
+  ) {
+    console.log(
+      `YouTube page loaded/updated: ${tab.url}. Attempting injection...`
+    )
+    await injectContentScript(tabId)
+
+    // Gửi message cập nhật trạng thái YouTube khi trang tải xong (đảm bảo isYouTube chính xác)
+    // Có thể trùng với message gửi khi title thay đổi, nhưng đảm bảo trạng thái cuối cùng đúng
+    chrome.runtime
+      .sendMessage({
+        action: 'tabUpdated',
+        isYouTube: true, // Chắc chắn là YouTube vì đã kiểm tra
+        tabId: tab.id,
+        tabUrl: tab.url,
+        tabTitle: tab.title, // Sử dụng tiêu đề cuối cùng sau khi tải xong
+      })
+      .catch((error) => {
+        if (
+          error.message.includes('Could not establish connection') ||
+          error.message.includes('Receiving end does not exist')
+        ) {
+          console.warn(
+            '[background.js] Side panel not open or no listener for tabUpdated message (complete status).'
+          )
+        } else {
+          console.error(
+            '[background.js] Error sending tabUpdated message (complete status):',
+            error
+          )
+        }
+      })
+  }
+})
 
 // Lắng nghe tin nhắn từ các phần khác của extension (ví dụ: side panel)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -191,6 +252,89 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     // Trả về true để chỉ ra rằng sendResponse sẽ được gọi bất đồng bộ
     return true
+  } else if (message.action === 'requestCurrentTabInfo') {
+    console.log('[background.js] Received requestCurrentTabInfo message.')
+    // Query for the active tab and send back its info
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTab = tabs[0]
+      if (activeTab) {
+        chrome.runtime
+          .sendMessage({
+            action: 'currentTabInfo', // Use a different action to avoid confusion with tabUpdated
+            tabId: activeTab.id,
+            tabUrl: activeTab.url,
+            tabTitle: activeTab.title,
+            isYouTube: activeTab.url.includes('youtube.com/watch'),
+          })
+          .catch((error) => {
+            console.error(
+              '[background.js] Error sending currentTabInfo message:',
+              error
+            )
+          })
+      } else {
+        console.warn('[background.js] No active tab found to send info.')
+      }
+    })
+    // Return true to indicate that sendResponse will be called asynchronously
+    return true
+
+    // Sử dụng hàm bất đồng bộ để xử lý và gửi phản hồi
+    ;(async () => {
+      try {
+        // Đảm bảo content script đã được inject (có thể gọi lại injectContentScript nếu cần)
+        // Hoặc đơn giản là thực thi trực tiếp hàm lấy transcript
+        // Lưu ý: Hàm getTranscriptContent phải được định nghĩa
+        // hoặc bạn inject một file chứa hàm đó.
+        // Ở đây, chúng ta sẽ inject một hàm đơn giản làm ví dụ.
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: targetTabId },
+          func: () => {
+            // Logic để lấy transcript từ trang YouTube
+            // Ví dụ đơn giản: tìm phần tử chứa transcript
+            // *** THAY THẾ BẰNG LOGIC LẤY TRANSCRIPT THỰC TẾ CỦA BẠN ***
+            const transcriptElement = document.querySelector(
+              'ytd-transcript-body-renderer'
+            ) // Selector ví dụ
+            return transcriptElement
+              ? transcriptElement.innerText
+              : 'Transcript not found.'
+          },
+        })
+
+        // Kiểm tra kết quả trả về từ executeScript
+        if (chrome.runtime.lastError) {
+          // Lỗi trong quá trình executeScript
+          console.error(
+            `[background.js] executeScript error: ${chrome.runtime.lastError.message}`
+          )
+          sendResponse({ error: chrome.runtime.lastError.message })
+        } else if (results && results[0]) {
+          console.log(
+            `[background.js] Script executed successfully on tab ${targetTabId}. Result:`,
+            results[0].result
+          )
+          sendResponse({ transcript: results[0].result })
+        } else {
+          console.warn(
+            `[background.js] executeScript returned unexpected results for tab ${targetTabId}:`,
+            results
+          )
+          sendResponse({
+            error: 'Failed to execute script or no result returned.',
+          })
+        }
+      } catch (err) {
+        console.error(
+          `[background.js] Error executing script for tab ${targetTabId}:`,
+          err
+        )
+        sendResponse({
+          error:
+            err.message || 'Unknown error occurred during script execution.',
+        })
+      }
+    })()
   }
 
   // Xử lý các action khác nếu cần
@@ -206,7 +350,10 @@ console.log('[background.js] Message listener added.')
 // 3. Lắng nghe sự kiện chuyển tab để cập nhật trạng thái loại tab
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   try {
-    const tab = await chrome.tabs.get(activeInfo.tabId)
+    // Sử dụng chrome.tabs.query để lấy thông tin về tab đang hoạt động
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+    const tab = tabs[0] // Lấy tab đầu tiên trong mảng kết quả
+
     if (tab && tab.url) {
       const isYouTube = tab.url.includes('youtube.com/watch')
       console.log(
